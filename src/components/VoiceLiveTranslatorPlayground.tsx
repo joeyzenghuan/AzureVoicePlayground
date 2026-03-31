@@ -1025,86 +1025,134 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
                 {/* ── Voice ── */}
                 <SettingsGroup title="Voice">
-                  <Field label="Provider" info="Voice synthesis provider. 'OpenAI' uses native OpenAI voices. 'Azure Neural' uses Azure's neural TTS with SSML support for style, rate, pitch, etc.">
+                  <Field label="Provider" info="Voice synthesis provider. 'OpenAI' uses native voices. 'Azure Neural' uses Azure TTS with SSML. 'Personal Voice' replicates a user's voice from a short sample. 'Custom Voice' uses a professionally trained custom voice model.">
                     <select
                       value={config.voiceProvider}
                       onChange={(e) => {
-                        const nextProvider = e.target.value as VoiceLiveConfig['voiceProvider'];
+                        const p = e.target.value as VoiceLiveConfig['voiceProvider'];
+                        const defaults: Record<string, string> = {
+                          'openai': 'alloy',
+                          'azure-standard': 'en-US-AvaMultilingualNeural',
+                          'azure-personal': '',
+                          'azure-custom': '',
+                        };
                         setConfig((c) => ({
                           ...c,
-                          voiceProvider: nextProvider,
-                          voiceName: nextProvider === 'openai' ? 'alloy' : 'en-US-AvaMultilingualNeural',
+                          voiceProvider: p,
+                          voiceName: defaults[p] ?? '',
+                          voiceModel: p === 'azure-personal' ? 'DragonLatestNeural' : undefined,
                         }));
                       }}
                       className={selectCls}
                     >
                       <option value="openai">OpenAI</option>
                       <option value="azure-standard">Azure Neural</option>
+                      <option value="azure-personal">Azure Personal Voice</option>
+                      <option value="azure-custom">Azure Custom Voice</option>
                     </select>
                   </Field>
-                  <Field label="Voice Name" info="The specific voice to use for speech synthesis.">
-                    <select value={config.voiceName}
-                      onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
-                      className={selectCls}>
-                      {config.voiceProvider === 'openai' ? (
-                        <>
-                          <option value="alloy">Alloy</option>
-                          <option value="ash">Ash</option>
-                          <option value="ballad">Ballad</option>
-                          <option value="coral">Coral</option>
-                          <option value="echo">Echo</option>
-                          <option value="sage">Sage</option>
-                          <option value="shimmer">Shimmer</option>
-                          <option value="verse">Verse</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="en-US-AvaMultilingualNeural">Ava (Female, conversational)</option>
-                          <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
-                          <option value="en-US-AndrewMultilingualNeural">Andrew (Male, conversational)</option>
-                          <option value="en-US-GuyMultilingualNeural">Guy (Male, professional)</option>
-                          <option value="zh-CN-XiaochenMultilingualNeural">Xiaochen (Female, assistant)</option>
-                        </>
-                      )}
-                    </select>
-                  </Field>
+                  {/* Voice Name: dropdown for openai/azure-standard, text input for personal/custom */}
+                  {config.voiceProvider === 'openai' && (
+                    <Field label="Voice Name" info="The specific OpenAI voice to use.">
+                      <select value={config.voiceName}
+                        onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
+                        className={selectCls}>
+                        <option value="alloy">Alloy</option>
+                        <option value="ash">Ash</option>
+                        <option value="ballad">Ballad</option>
+                        <option value="coral">Coral</option>
+                        <option value="echo">Echo</option>
+                        <option value="sage">Sage</option>
+                        <option value="shimmer">Shimmer</option>
+                        <option value="verse">Verse</option>
+                      </select>
+                    </Field>
+                  )}
                   {config.voiceProvider === 'azure-standard' && (
+                    <Field label="Voice Name" info="Azure neural voice name.">
+                      <select value={config.voiceName}
+                        onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
+                        className={selectCls}>
+                        <option value="en-US-AvaMultilingualNeural">Ava (Female, conversational)</option>
+                        <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
+                        <option value="en-US-AndrewMultilingualNeural">Andrew (Male, conversational)</option>
+                        <option value="en-US-GuyMultilingualNeural">Guy (Male, professional)</option>
+                        <option value="zh-CN-XiaochenMultilingualNeural">Xiaochen (Female, assistant)</option>
+                      </select>
+                    </Field>
+                  )}
+                  {config.voiceProvider === 'azure-personal' && (
                     <>
-                      <Field label="Style" info="Speaking style for Azure neural voices. Available styles depend on the voice. Common styles: cheerful, sad, angry, friendly, shouting, whispering, terrified, unfriendly.">
+                      <Field label="Personal Voice Name" info="The name/ID of your personal voice speaker profile. Create one via Azure AI Speech portal.">
+                        <input type="text" value={config.voiceName}
+                          onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
+                          placeholder="your-personal-voice-name" className={inputCls} />
+                      </Field>
+                      <Field label="Base Model" info="The base neural model used for personal voice synthesis. 'DragonLatestNeural' is the standard model. 'DragonHDOmniLatestNeural' is the high-definition variant.">
+                        <select value={config.voiceModel ?? 'DragonLatestNeural'}
+                          onChange={(e) => setConfig((c) => ({ ...c, voiceModel: e.target.value }))}
+                          className={selectCls}>
+                          <option value="DragonLatestNeural">DragonLatestNeural</option>
+                          <option value="DragonHDOmniLatestNeural">DragonHDOmniLatestNeural</option>
+                        </select>
+                      </Field>
+                    </>
+                  )}
+                  {config.voiceProvider === 'azure-custom' && (
+                    <>
+                      <Field label="Custom Voice Name" info="The name of your custom neural voice (e.g. 'en-US-CustomNeural'). Must be deployed on the same Foundry resource.">
+                        <input type="text" value={config.voiceName}
+                          onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
+                          placeholder="en-US-CustomNeural" className={inputCls} />
+                      </Field>
+                      <Field label="Endpoint ID" info="The deployment endpoint ID (GUID) for your custom voice model. Find this in Azure AI Speech portal under your custom voice deployment.">
+                        <input type="text" value={config.voiceEndpointId ?? ''}
+                          onChange={(e) => setConfig((c) => ({ ...c, voiceEndpointId: e.target.value || undefined }))}
+                          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className={inputCls} />
+                      </Field>
+                    </>
+                  )}
+                  {/* Voice Temperature: available for azure-standard, azure-personal, azure-custom */}
+                  {config.voiceProvider !== 'openai' && (
+                    <Field label="Voice Temperature" info="Controls variation in voice output (0.0-1.0). Lower = more consistent, higher = more expressive variation. Only effective with HD voices.">
+                      <input type="number" min={0} max={1} step={0.1}
+                        value={config.voiceTemperature ?? ''}
+                        onChange={(e) => setConfig((c) => ({ ...c, voiceTemperature: e.target.value === '' ? undefined : parseFloat(e.target.value) }))}
+                        placeholder="Not set (server default)" className={inputCls} />
+                    </Field>
+                  )}
+                  {/* SSML properties: only for azure-standard and azure-custom */}
+                  {(config.voiceProvider === 'azure-standard' || config.voiceProvider === 'azure-custom') && (
+                    <>
+                      <Field label="Style" info="Speaking style. Available styles depend on the voice. Common: cheerful, sad, angry, friendly, shouting, whispering.">
                         <input type="text" value={config.voiceStyle ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voiceStyle: e.target.value || undefined }))}
                           placeholder="Not set (default style)" className={inputCls} />
                       </Field>
-                      <Field label="Rate" info="Speech rate adjustment. Values: '0.5' to '2.0' (multiplier), or percentage like '+20%', '-10%'. Default: 1.0 (normal speed).">
+                      <Field label="Rate" info="Speech rate. Values: '0.5' to '2.0' (multiplier), or '+20%', '-10%'. Default: 1.0.">
                         <input type="text" value={config.voiceRate ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voiceRate: e.target.value || undefined }))}
                           placeholder="Not set (1.0)" className={inputCls} />
                       </Field>
-                      <Field label="Pitch" info="Pitch adjustment. Values: percentage like '+10%', '-5%', or semitones like '+2st', '-3st'. Default: 0 (no change).">
+                      <Field label="Pitch" info="Pitch adjustment. Values: '+10%', '-5%', or semitones '+2st'. Default: 0.">
                         <input type="text" value={config.voicePitch ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voicePitch: e.target.value || undefined }))}
                           placeholder="Not set (default)" className={inputCls} />
                       </Field>
-                      <Field label="Volume" info="Volume adjustment. Values: percentage like '80%', or decibels like '+10dB', '-5dB'. Default: 100% (full volume).">
+                      <Field label="Volume" info="Volume adjustment. Values: '80%', or '+10dB', '-5dB'. Default: 100%.">
                         <input type="text" value={config.voiceVolume ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voiceVolume: e.target.value || undefined }))}
                           placeholder="Not set (100%)" className={inputCls} />
                       </Field>
-                      <Field label="Locale" info="Specific locale for the voice (e.g. 'en-US', 'zh-CN'). Overrides the voice's default locale. Useful for multilingual voices.">
+                      <Field label="Locale" info="Specific locale (e.g. 'en-US', 'zh-CN'). Overrides the voice's default locale.">
                         <input type="text" value={config.voiceLocale ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voiceLocale: e.target.value || undefined }))}
                           placeholder="Not set (auto)" className={inputCls} />
                       </Field>
-                      <Field label="Prefer Locales" info="Preferred locale order for multilingual voices (comma-separated, e.g. 'en-US,zh-CN'). The voice will prefer the first matching locale.">
+                      <Field label="Prefer Locales" info="Preferred locale order for multilingual voices (comma-separated, e.g. 'en-US,zh-CN').">
                         <input type="text" value={config.voicePreferLocales ?? ''}
                           onChange={(e) => setConfig((c) => ({ ...c, voicePreferLocales: e.target.value || undefined }))}
                           placeholder="Not set" className={inputCls} />
-                      </Field>
-                      <Field label="Voice Temperature" info="Controls variation in voice output (0.0-1.0). Lower = more consistent, higher = more expressive variation. This is separate from the model temperature.">
-                        <input type="number" min={0} max={1} step={0.1}
-                          value={config.voiceTemperature ?? ''}
-                          onChange={(e) => setConfig((c) => ({ ...c, voiceTemperature: e.target.value === '' ? undefined : parseFloat(e.target.value) }))}
-                          placeholder="Not set (server default)" className={inputCls} />
                       </Field>
                     </>
                   )}

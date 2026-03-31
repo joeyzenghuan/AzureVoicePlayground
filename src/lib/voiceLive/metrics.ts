@@ -188,7 +188,7 @@ export interface CostBreakdown {
 export function calculateTurnCostBreakdown(
   usage: TokenUsage,
   modelTier: VoiceLiveTier = 'standard',
-  voiceProvider: 'openai' | 'azure-standard' = 'azure-standard'
+  voiceProvider: string = 'azure-standard'
 ): CostBreakdown {
   const voiceType: VoiceType = voiceProvider === 'openai' ? 'native-audio' : 'azure-standard';
   const rates = PRICING_TABLE[modelTier][voiceType];
@@ -215,7 +215,7 @@ export function calculateTurnCostBreakdown(
 export function calculateTurnCost(
   usage: TokenUsage,
   modelTier: VoiceLiveTier = 'standard',
-  voiceProvider: 'openai' | 'azure-standard' = 'azure-standard'
+  voiceProvider: string = 'azure-standard'
 ): number {
   return calculateTurnCostBreakdown(usage, modelTier, voiceProvider).total;
 }
@@ -223,7 +223,7 @@ export function calculateTurnCost(
 export function calculateCost(
   totals: Totals,
   modelTier: VoiceLiveTier = 'standard',
-  voiceProvider: 'openai' | 'azure-standard' = 'azure-standard'
+  voiceProvider: string = 'azure-standard'
 ): number {
   const voiceType: VoiceType = voiceProvider === 'openai' ? 'native-audio' : 'azure-standard';
   const rates = PRICING_TABLE[modelTier][voiceType];

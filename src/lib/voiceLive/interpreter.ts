@@ -97,7 +97,7 @@ export class VoiceLiveInterpreter {
   private currentSpeechStartMs = 0;
   private currentSpeechStopMs = 0;
   private pricingTier: VoiceLiveTier = 'standard';
-  private voiceProvider: 'openai' | 'azure-standard' = 'azure-standard';
+  private voiceProvider: string = 'azure-standard';
   private audioChunkTracker = new Map<string, { count: number; totalBytes: number }>();
   private pendingUserTranscript: string | undefined;
 

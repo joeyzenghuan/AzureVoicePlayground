@@ -78,7 +78,7 @@ export type VoiceLiveConfig = {
   eouTimeoutInMs: number;
 
   // Voice
-  voiceProvider: 'openai' | 'azure-standard';
+  voiceProvider: 'openai' | 'azure-standard' | 'azure-personal' | 'azure-custom';
   voiceName: string;
   voiceStyle?: string;
   voiceRate?: string;
@@ -87,6 +87,8 @@ export type VoiceLiveConfig = {
   voiceLocale?: string;
   voicePreferLocales?: string;
   voiceTemperature?: number;
+  voiceEndpointId?: string;
+  voiceModel?: string;
 
   // Audio Format
   inputAudioFormat: string;
@@ -181,25 +183,44 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const voice =
-    config.voiceProvider === 'openai'
-      ? {
-          type: 'openai' as const,
-          name: config.voiceName as any,
-        }
-      : {
-          type: 'azure-standard' as const,
-          name: config.voiceName,
-          ...(optField(config.voiceStyle) && { style: config.voiceStyle }),
-          ...(optField(config.voiceRate) && { rate: config.voiceRate }),
-          ...(optField(config.voicePitch) && { pitch: config.voicePitch }),
-          ...(optField(config.voiceVolume) && { volume: config.voiceVolume }),
-          ...(optField(config.voiceLocale) && { locale: config.voiceLocale }),
-          ...(optField(config.voicePreferLocales) && {
-            preferLocales: config.voicePreferLocales!.split(',').map((s) => s.trim()).filter(Boolean),
-          }),
-          ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
-        };
+  const azureSsmlProps = {
+    ...(optField(config.voiceStyle) && { style: config.voiceStyle }),
+    ...(optField(config.voiceRate) && { rate: config.voiceRate }),
+    ...(optField(config.voicePitch) && { pitch: config.voicePitch }),
+    ...(optField(config.voiceVolume) && { volume: config.voiceVolume }),
+    ...(optField(config.voiceLocale) && { locale: config.voiceLocale }),
+    ...(optField(config.voicePreferLocales) && {
+      preferLocales: config.voicePreferLocales!.split(',').map((s) => s.trim()).filter(Boolean),
+    }),
+    ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
+  };
+
+  let voice: any;
+  switch (config.voiceProvider) {
+    case 'openai':
+      voice = { type: 'openai', name: config.voiceName };
+      break;
+    case 'azure-personal':
+      voice = {
+        type: 'azure-personal',
+        name: config.voiceName,
+        model: config.voiceModel || 'DragonLatestNeural',
+        ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
+      };
+      break;
+    case 'azure-custom':
+      voice = {
+        type: 'azure-custom',
+        name: config.voiceName,
+        ...(optField(config.voiceEndpointId) && { endpointId: config.voiceEndpointId }),
+        ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
+        ...azureSsmlProps,
+      };
+      break;
+    default: // azure-standard
+      voice = { type: 'azure-standard', name: config.voiceName, ...azureSsmlProps };
+      break;
+  }
 
   return {
     model: config.model,
