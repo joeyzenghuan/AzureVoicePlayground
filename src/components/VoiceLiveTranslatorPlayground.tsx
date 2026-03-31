@@ -511,7 +511,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                       return (
                         <tr key={t.responseId} className="hover:bg-gray-50">
                           <td className="px-3 py-1.5 font-medium text-gray-700">{i + 1}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u ? `${(u.inputTokenDetails.audioTokens / 10).toFixed(1)}s` : '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{t.speechStartedAtMs && t.speechStoppedAtMs ? `${((t.speechStoppedAtMs - t.speechStartedAtMs) / 1000).toFixed(1)}s` : '-'}</td>
                           <td className="px-3 py-1.5 text-right tabular-nums font-medium text-pink-600">{t.e2eLatencyMs != null ? `${t.e2eLatencyMs}ms` : '-'}</td>
                           <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.textTokens ?? '-'}</td>
                           <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.cachedTokensDetails.textTokens ?? '-'}</td>
@@ -528,7 +528,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                   <tfoot className="bg-gray-50 border-t border-gray-200 sticky bottom-0">
                     <tr className="font-semibold text-gray-800">
                       <td className="px-3 py-2">Avg/Total</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.audioTokens ?? 0), 0) > 0 ? `${(turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.audioTokens ?? 0), 0) / 10).toFixed(1)}s` : '-'}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{(() => { const total = turnMetrics.reduce((s, t) => s + (t.speechStartedAtMs && t.speechStoppedAtMs ? t.speechStoppedAtMs - t.speechStartedAtMs : 0), 0); return total > 0 ? `${(total / 1000).toFixed(1)}s` : '-'; })()}</td>
                       <td className="px-3 py-2 text-right tabular-nums text-pink-600">{e2eLatencies.length > 0 ? `${Math.round(calculateAverage(e2eLatencies))}ms` : '-'}</td>
                       <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.textTokens ?? 0), 0)}</td>
                       <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.cachedTokensDetails.textTokens ?? 0), 0)}</td>
