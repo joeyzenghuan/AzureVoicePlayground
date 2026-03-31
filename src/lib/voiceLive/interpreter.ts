@@ -357,8 +357,18 @@ export class VoiceLiveInterpreter {
         if (turn) {
           turn.metrics.finishedAtMs = finishedAtMs;
           turn.metrics.latencyMs = finishedAtMs - turn.metrics.startedAtMs;
-          turn.metrics.assistantText = turn.textBuffer.trim();
           turn.metrics.usage = event.response.usage;
+
+          // Resolve assistant text: prefer textBuffer from onResponseTextDone, fallback to response.output transcript
+          let resolvedText = turn.textBuffer.trim();
+          if (!resolvedText && event.response.output && event.response.output.length > 0) {
+            const outputItem: any = event.response.output[0];
+            if (outputItem?.content && Array.isArray(outputItem.content)) {
+              const textContent = outputItem.content.find((c: any) => c.type === 'audio' && c.transcript);
+              if (textContent?.transcript) resolvedText = textContent.transcript;
+            }
+          }
+          turn.metrics.assistantText = resolvedText || undefined;
 
           const turnNumber = this.state.turns.length + 1;
           const nextTurns = [...this.state.turns, turn.metrics];
@@ -436,17 +446,7 @@ export class VoiceLiveInterpreter {
           latencyLogItem.e2eMs = m.e2eLatencyMs;
 
           if (!turn.ttsLogged) {
-            let ttsText = '(no text)';
-            if (event.response.output && event.response.output.length > 0) {
-              const outputItem: any = event.response.output[0];
-              if (outputItem?.content && Array.isArray(outputItem.content)) {
-                const textContent = outputItem.content.find((c: any) => c.type === 'audio' && c.transcript);
-                if (textContent?.transcript) {
-                  ttsText = textContent.transcript;
-                }
-              }
-            }
-            this.log('output', `🔊 ${ttsText}`, 'conversation');
+            this.log('output', `🔊 ${resolvedText || '(no text)'}`, 'conversation');
           }
 
           if (event.response.usage) {
