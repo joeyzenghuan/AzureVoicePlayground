@@ -203,6 +203,14 @@ export class VoiceLiveInterpreter {
         event: ServerEventConversationItemInputAudioTranscriptionCompleted
       ) => {
         console.log('[VoiceLive Event] onConversationItemInputAudioTranscriptionCompleted', event);
+        // Associate transcript with the most recent turn
+        if (this.currentPlaybackResponseId) {
+          const turn = this.turnMap.get(this.currentPlaybackResponseId);
+          if (turn) {
+            turn.metrics.userTranscript = event.transcript;
+            this.turnMap.set(this.currentPlaybackResponseId, turn);
+          }
+        }
         this.log('input', `🎤 ${event.transcript}`, 'conversation');
         this.log('info', `[ASR done] ${event.transcript}`, 'asr');
         this.log('info', '[server] conversation.item.input_audio_transcription.completed', 'server_event',

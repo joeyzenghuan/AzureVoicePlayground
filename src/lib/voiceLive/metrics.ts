@@ -12,6 +12,7 @@ export type TurnMetrics = {
   e2eLatencyMs?: number;
   audioBufferDelayMs?: number;
   usage?: TokenUsage;
+  userTranscript?: string;
   assistantText?: string;
   speechStartedAtMs?: number;
   speechStoppedAtMs?: number;
