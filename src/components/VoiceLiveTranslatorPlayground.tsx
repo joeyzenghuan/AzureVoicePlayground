@@ -14,7 +14,7 @@ import {
   type DebugCategory,
   type HighlightColor,
 } from '../lib/voiceLive/interpreter';
-import { calculatePercentile, calculateAverage, calculateCost } from '../lib/voiceLive/metrics';
+import { calculatePercentile, calculateAverage, calculateCost, calculateTurnCostBreakdown, type TurnMetrics } from '../lib/voiceLive/metrics';
 
 interface VoiceLiveTranslatorPlaygroundProps {
   endpoint: string;
@@ -177,6 +177,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [turns, setTurns] = useState(() => 0);
+  const [turnMetrics, setTurnMetrics] = useState<TurnMetrics[]>(() => []);
+  const [showTurnTable, setShowTurnTable] = useState(false);
   const [sessionStartMs, setSessionStartMs] = useState(() => 0);
   const [inputAudioSeconds, setInputAudioSeconds] = useState(() => 0);
   const [inputAudioTokens, setInputAudioTokens] = useState(() => 0);
@@ -202,6 +204,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
         setIsConnected(s.isConnected);
         setLogs(s.logs);
         setTurns(s.totals.turns);
+        setTurnMetrics(s.turns);
         setSessionStartMs(s.totals.sessionStartMs);
         setInputAudioSeconds(s.totals.inputAudioSeconds);
         setInputAudioTokens(s.totals.inputAudioTokens);
@@ -470,6 +473,72 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
             </div>
           </div>
         </div>
+
+        {/* Per-Turn Statistics Table */}
+        {turnMetrics.length > 0 && (
+          <div className="bg-white border-b border-gray-200">
+            <button
+              onClick={() => setShowTurnTable((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <span>Per-Turn Statistics ({turnMetrics.length} turns)</span>
+              <svg className={`w-4 h-4 transition-transform ${showTurnTable ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showTurnTable && (
+              <div className="overflow-x-auto max-h-64 overflow-y-auto border-t border-gray-100">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr className="text-gray-500 text-left">
+                      <th className="px-3 py-2 font-semibold">#</th>
+                      <th className="px-3 py-2 font-semibold text-right">Input Text</th>
+                      <th className="px-3 py-2 font-semibold text-right">Input Audio</th>
+                      <th className="px-3 py-2 font-semibold text-right">Cached Text</th>
+                      <th className="px-3 py-2 font-semibold text-right">Cached Audio</th>
+                      <th className="px-3 py-2 font-semibold text-right">Output Text</th>
+                      <th className="px-3 py-2 font-semibold text-right">Output Audio</th>
+                      <th className="px-3 py-2 font-semibold text-right">Total Tokens</th>
+                      <th className="px-3 py-2 font-semibold text-right">Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {turnMetrics.map((t, i) => {
+                      const u = t.usage;
+                      const cost = u ? calculateTurnCostBreakdown(u, pricingTier, config.voiceProvider).total : 0;
+                      return (
+                        <tr key={t.responseId} className="hover:bg-gray-50">
+                          <td className="px-3 py-1.5 font-medium text-gray-700">{i + 1}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.textTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.audioTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.cachedTokensDetails.textTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.inputTokenDetails.cachedTokensDetails.audioTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.outputTokenDetails.textTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums text-gray-600">{u?.outputTokenDetails.audioTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums font-medium text-gray-800">{u?.totalTokens ?? '-'}</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums font-medium text-emerald-700">{u ? `$${cost.toFixed(6)}` : '-'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot className="bg-gray-50 border-t border-gray-200 sticky bottom-0">
+                    <tr className="font-semibold text-gray-800">
+                      <td className="px-3 py-2">Total</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.textTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.audioTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.cachedTokensDetails.textTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.inputTokenDetails.cachedTokensDetails.audioTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.outputTokenDetails.textTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.outputTokenDetails.audioTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{turnMetrics.reduce((s, t) => s + (t.usage?.totalTokens ?? 0), 0)}</td>
+                      <td className="px-3 py-2 text-right tabular-nums text-emerald-700">${totalCost.toFixed(6)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Log Panel */}
         <div className="flex-1 flex flex-col overflow-hidden p-4">
