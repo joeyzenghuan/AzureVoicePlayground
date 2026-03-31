@@ -52,20 +52,48 @@ export type VoiceLiveConfig = {
   apiKey: string;
   model: string;
   targetLanguage: string;
+  prompt: string;
+
+  // Model parameters
+  temperature?: number;
+  maxResponseOutputTokens?: number;
+
+  // ASR & Recognition
   asrModel: 'azure-speech' | 'whisper-1' | 'gpt-4o-mini-transcribe' | 'gpt-4o-transcribe';
   asrLanguages: string;
-  voiceProvider: 'openai' | 'azure-standard';
-  voiceName: string;
-  prompt: string;
+  phraseList?: string;
+
+  // Turn Detection (VAD)
   turnDetectionType: 'server_vad' | 'azure_semantic_vad';
   threshold: number;
   prefixPaddingInMs: number;
   silenceDurationInMs: number;
   speechDurationInMs: number;
   removeFillerWords: boolean;
+  interruptResponse: boolean;
+  autoTruncate?: boolean;
+  vadLanguages?: string;
   eouModel: 'semantic_detection_v1';
   eouThresholdLevel: 'low' | 'medium' | 'high' | 'default';
   eouTimeoutInMs: number;
+
+  // Voice
+  voiceProvider: 'openai' | 'azure-standard';
+  voiceName: string;
+  voiceStyle?: string;
+  voiceRate?: string;
+  voicePitch?: string;
+  voiceVolume?: string;
+  voiceLocale?: string;
+  voicePreferLocales?: string;
+  voiceTemperature?: number;
+
+  // Audio Format
+  inputAudioFormat: string;
+  inputAudioSamplingRate: number;
+  outputAudioFormat: string;
+  noiseReduction?: boolean;
+  echoCancellation?: boolean;
 };
 
 export const DEFAULT_CONFIG: VoiceLiveConfig = {
@@ -73,20 +101,28 @@ export const DEFAULT_CONFIG: VoiceLiveConfig = {
   apiKey: '',
   model: 'gpt-4.1-mini',
   targetLanguage: 'en',
+  prompt: '',
+
   asrModel: 'azure-speech',
   asrLanguages: '',
-  voiceProvider: 'azure-standard',
-  voiceName: 'en-US-AvaMultilingualNeural',
-  prompt: '',
+
   turnDetectionType: 'azure_semantic_vad',
   threshold: 0.5,
   prefixPaddingInMs: 300,
   silenceDurationInMs: 200,
   speechDurationInMs: 80,
   removeFillerWords: false,
+  interruptResponse: false,
   eouModel: 'semantic_detection_v1',
   eouThresholdLevel: 'default',
   eouTimeoutInMs: 1000,
+
+  voiceProvider: 'azure-standard',
+  voiceName: 'en-US-AvaMultilingualNeural',
+
+  inputAudioFormat: 'pcm16',
+  inputAudioSamplingRate: 16000,
+  outputAudioFormat: 'pcm16',
 };
 
 export function buildInterpreterPrompt(targetLanguage: string): string {
@@ -103,31 +139,35 @@ export function buildInterpreterPrompt(targetLanguage: string): string {
   ].join('\n');
 }
 
+/** Helper: only include a key if the value is defined */
+function optField<T>(val: T | undefined | null): T | undefined {
+  return val != null && val !== '' ? val : undefined;
+}
+
 export function toRequestSession(config: VoiceLiveConfig): RequestSession {
   const effectiveTurnDetectionType =
     config.asrModel === 'azure-speech' ? 'azure_semantic_vad' : config.turnDetectionType;
 
+  const baseTurnDetection = {
+    threshold: config.threshold,
+    prefixPaddingInMs: config.prefixPaddingInMs,
+    silenceDurationInMs: config.silenceDurationInMs,
+    createResponse: true,
+    interruptResponse: config.interruptResponse,
+    ...(config.autoTruncate != null && { autoTruncate: config.autoTruncate }),
+  };
+
   const turnDetection: TurnDetectionUnion =
     effectiveTurnDetectionType === 'server_vad'
-      ? {
-          type: 'server_vad',
-          threshold: config.threshold,
-          prefixPaddingInMs: config.prefixPaddingInMs,
-          silenceDurationInMs: config.silenceDurationInMs,
-          createResponse: true,
-          interruptResponse: false,
-        }
+      ? { type: 'server_vad', ...baseTurnDetection }
       : {
           type: 'azure_semantic_vad',
-          threshold: config.threshold,
-          prefixPaddingInMs: config.prefixPaddingInMs,
-          silenceDurationInMs: config.silenceDurationInMs,
+          ...baseTurnDetection,
           speechDurationInMs: config.speechDurationInMs,
           removeFillerWords: config.removeFillerWords,
-          // Note: endOfUtteranceDetection is only supported for cascaded pipelines (Voice Live Chat)
-          // and causes errors for the translator, so it's intentionally omitted here
-          createResponse: true,
-          interruptResponse: false,
+          ...(config.vadLanguages && {
+            languages: config.vadLanguages.split(',').map((s) => s.trim()).filter(Boolean),
+          }),
         };
 
   const asrLanguages = config.asrLanguages
@@ -136,33 +176,59 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
     .filter(Boolean)
     .join(',');
 
+  const phraseListArr = config.phraseList
+    ?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const voice =
+    config.voiceProvider === 'openai'
+      ? {
+          type: 'openai' as const,
+          name: config.voiceName as any,
+        }
+      : {
+          type: 'azure-standard' as const,
+          name: config.voiceName,
+          ...(optField(config.voiceStyle) && { style: config.voiceStyle }),
+          ...(optField(config.voiceRate) && { rate: config.voiceRate }),
+          ...(optField(config.voicePitch) && { pitch: config.voicePitch }),
+          ...(optField(config.voiceVolume) && { volume: config.voiceVolume }),
+          ...(optField(config.voiceLocale) && { locale: config.voiceLocale }),
+          ...(optField(config.voicePreferLocales) && {
+            preferLocales: config.voicePreferLocales!.split(',').map((s) => s.trim()).filter(Boolean),
+          }),
+          ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
+        };
+
   return {
     model: config.model,
     modalities: ['audio', 'text'],
     instructions: config.prompt,
-    inputAudioFormat: 'pcm16',
-    inputAudioSamplingRate: 16000,
-    outputAudioFormat: 'pcm16',
+    inputAudioFormat: config.inputAudioFormat as any,
+    inputAudioSamplingRate: config.inputAudioSamplingRate,
+    outputAudioFormat: config.outputAudioFormat as any,
     turnDetection,
+    ...(config.temperature != null && { temperature: config.temperature }),
+    ...(config.maxResponseOutputTokens != null && { maxResponseOutputTokens: config.maxResponseOutputTokens }),
+    ...(config.noiseReduction != null && {
+      inputAudioNoiseReduction: { type: 'server_noise_reduction' } as any,
+    }),
+    ...(config.echoCancellation != null && config.echoCancellation && {
+      inputAudioEchoCancellation: { type: 'server_echo_cancellation' } as any,
+    }),
     inputAudioTranscription:
       config.asrModel === 'azure-speech'
         ? {
             model: 'azure-speech',
             language: asrLanguages || undefined,
+            ...(phraseListArr?.length && { phraseList: phraseListArr }),
           }
         : {
             model: config.asrModel,
+            ...(phraseListArr?.length && { phraseList: phraseListArr }),
           },
-    voice:
-      config.voiceProvider === 'openai'
-        ? {
-            type: 'openai',
-            name: config.voiceName as any,
-          }
-        : {
-            type: 'azure-standard',
-            name: config.voiceName,
-          },
+    voice,
   };
 }
 

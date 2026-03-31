@@ -5,9 +5,12 @@ export type TurnMetrics = {
   startedAtMs: number;
   firstTextDeltaAtMs?: number;
   firstAudioDeltaAtMs?: number;
+  playbackStartedAtMs?: number;
   finishedAtMs?: number;
   latencyMs?: number;
   firstTokenLatencyMs?: number;
+  e2eLatencyMs?: number;
+  audioBufferDelayMs?: number;
   usage?: TokenUsage;
   assistantText?: string;
   speechStartedAtMs?: number;
@@ -30,6 +33,7 @@ export type Totals = {
   outputAudioTokens: number;
   startLatencies: number[];
   endLatencies: number[];
+  e2eLatencies: number[];
 };
 
 export const EMPTY_TOTALS: Totals = {
@@ -46,6 +50,7 @@ export const EMPTY_TOTALS: Totals = {
   outputAudioTokens: 0,
   startLatencies: [],
   endLatencies: [],
+  e2eLatencies: [],
 };
 
 export function addUsage(t: Totals, usage: TokenUsage): Totals {
@@ -76,8 +81,8 @@ export function calculateAverage(values: number[]): number {
   return values.reduce((sum, v) => sum + v, 0) / values.length;
 }
 
-type VoiceLiveTier = 'pro' | 'standard' | 'lite';
-type VoiceType = 'text' | 'azure-standard' | 'native-audio';
+export type VoiceLiveTier = 'pro' | 'standard' | 'lite';
+export type VoiceType = 'text' | 'azure-standard' | 'native-audio';
 
 interface PricingRates {
   inputText: number;
@@ -168,6 +173,51 @@ const PRICING_TABLE: Record<VoiceLiveTier, Record<VoiceType, PricingRates>> = {
     },
   },
 };
+
+export interface CostBreakdown {
+  total: number;
+  inputText: { tokens: number; rate: number; cost: number };
+  cachedText: { tokens: number; rate: number; cost: number };
+  outputText: { tokens: number; rate: number; cost: number };
+  inputAudio: { tokens: number; rate: number; cost: number };
+  cachedAudio: { tokens: number; rate: number; cost: number };
+  outputAudio: { tokens: number; rate: number; cost: number };
+}
+
+export function calculateTurnCostBreakdown(
+  usage: TokenUsage,
+  modelTier: VoiceLiveTier = 'standard',
+  voiceProvider: 'openai' | 'azure-standard' = 'azure-standard'
+): CostBreakdown {
+  const voiceType: VoiceType = voiceProvider === 'openai' ? 'native-audio' : 'azure-standard';
+  const rates = PRICING_TABLE[modelTier][voiceType];
+
+  const items = {
+    inputText: { tokens: usage.inputTokenDetails.textTokens, rate: rates.inputText, cost: 0 },
+    cachedText: { tokens: usage.inputTokenDetails.cachedTokensDetails.textTokens, rate: rates.cachedText, cost: 0 },
+    outputText: { tokens: usage.outputTokenDetails.textTokens, rate: rates.outputText, cost: 0 },
+    inputAudio: { tokens: usage.inputTokenDetails.audioTokens, rate: rates.inputAudio, cost: 0 },
+    cachedAudio: { tokens: usage.inputTokenDetails.cachedTokensDetails.audioTokens, rate: rates.cachedAudio, cost: 0 },
+    outputAudio: { tokens: usage.outputTokenDetails.audioTokens, rate: rates.outputAudio, cost: 0 },
+  };
+
+  for (const v of Object.values(items)) {
+    v.cost = (v.tokens / 1_000_000) * v.rate;
+  }
+
+  return {
+    ...items,
+    total: Object.values(items).reduce((s, v) => s + v.cost, 0),
+  };
+}
+
+export function calculateTurnCost(
+  usage: TokenUsage,
+  modelTier: VoiceLiveTier = 'standard',
+  voiceProvider: 'openai' | 'azure-standard' = 'azure-standard'
+): number {
+  return calculateTurnCostBreakdown(usage, modelTier, voiceProvider).total;
+}
 
 export function calculateCost(
   totals: Totals,

@@ -30,3 +30,7 @@ dist-ssr
 
 # Temporary files
 tmpclaude-*
+
+# Test screenshots and results
+tests/e2e/screenshots/
+test-results/

@@ -4,6 +4,11 @@ export type VolumeCallback = (volume: number) => void;
 export type PlaybackCompleteCallback = () => void;
 export type PlaybackStartCallback = (actualStartTime: number) => void;
 
+/** Gap (in seconds) inserted between consecutive utterances for natural pacing */
+const UTTERANCE_GAP_SEC = 0.35;
+/** Initial buffer (in seconds) before the very first chunk of an utterance plays */
+const INITIAL_BUFFER_SEC = 0.05;
+
 export class Pcm16Player {
   private audioContext: AudioContext;
   private analyser: AnalyserNode;
@@ -16,6 +21,7 @@ export class Pcm16Player {
   private onPlaybackStart: PlaybackStartCallback | null = null;
   private hasStartedPlayback = false;
   private firstChunkQueueTime: number = 0;
+  private isNewUtterance = false;
 
   constructor() {
     this.audioContext = new AudioContext();
@@ -96,10 +102,19 @@ export class Pcm16Player {
 
     const now = this.audioContext.currentTime;
 
-    // Add initial buffer for first chunk (like Gemini does)
-    if (!this.hasStartedPlayback) {
-      this.nextStartTime = now + 0.05; // 50ms initial buffer
+    if (this.isNewUtterance) {
+      // First chunk of a new utterance
+      this.isNewUtterance = false;
+
+      if (this.nextStartTime > now) {
+        // Previous utterance is still playing — append after it with a natural gap
+        this.nextStartTime += UTTERANCE_GAP_SEC;
+      } else {
+        // Nothing is playing — start after a small initial buffer
+        this.nextStartTime = now + INITIAL_BUFFER_SEC;
+      }
     } else if (this.nextStartTime < now) {
+      // Mid-utterance but queue has drained (slow chunk arrival) — resume from now
       this.nextStartTime = now;
     }
 
@@ -130,6 +145,16 @@ export class Pcm16Player {
     this.startVolumeMonitoring();
   }
 
+  /**
+   * Signal that the next enqueued chunk belongs to a new utterance.
+   * If the previous utterance is still playing, a natural gap will be inserted.
+   * Also resets the playback-start callback so it fires again for this utterance.
+   */
+  markNewUtterance() {
+    this.hasStartedPlayback = false;
+    this.isNewUtterance = true;
+  }
+
   stop() {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
@@ -144,7 +169,8 @@ export class Pcm16Player {
     }
     this.sources = [];
     this.nextStartTime = 0;
-    this.hasStartedPlayback = false; // Reset for next turn
+    this.hasStartedPlayback = false;
+    this.isNewUtterance = false;
     if (this.onVolume) {
       this.onVolume(0); // Reset to zero
     }
