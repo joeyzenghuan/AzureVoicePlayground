@@ -99,6 +99,7 @@ export class VoiceLiveInterpreter {
   private pricingTier: VoiceLiveTier = 'standard';
   private voiceProvider: 'openai' | 'azure-standard' = 'azure-standard';
   private audioChunkTracker = new Map<string, { count: number; totalBytes: number }>();
+  private pendingUserTranscript: string | undefined;
 
   private readonly events: InterpreterEvents;
 
@@ -203,14 +204,8 @@ export class VoiceLiveInterpreter {
         event: ServerEventConversationItemInputAudioTranscriptionCompleted
       ) => {
         console.log('[VoiceLive Event] onConversationItemInputAudioTranscriptionCompleted', event);
-        // Associate transcript with the most recent turn
-        if (this.currentPlaybackResponseId) {
-          const turn = this.turnMap.get(this.currentPlaybackResponseId);
-          if (turn) {
-            turn.metrics.userTranscript = event.transcript;
-            this.turnMap.set(this.currentPlaybackResponseId, turn);
-          }
-        }
+        // Store transcript — will be picked up by the next onResponseCreated
+        this.pendingUserTranscript = event.transcript;
         this.log('input', `🎤 ${event.transcript}`, 'conversation');
         this.log('info', `[ASR done] ${event.transcript}`, 'asr');
         this.log('info', '[server] conversation.item.input_audio_transcription.completed', 'server_event',
@@ -240,7 +235,9 @@ export class VoiceLiveInterpreter {
           startedAtMs: Date.now(),
           speechStartedAtMs: this.currentSpeechStartMs,
           speechStoppedAtMs: this.currentSpeechStopMs,
+          userTranscript: this.pendingUserTranscript,
         };
+        this.pendingUserTranscript = undefined;
         this.turnMap.set(responseId, { metrics, textBuffer: '' });
         this.audioChunkTracker.set(responseId, { count: 0, totalBytes: 0 });
 
