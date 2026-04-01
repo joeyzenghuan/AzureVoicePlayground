@@ -251,11 +251,6 @@ export class VoiceLiveInterpreter {
             const bufferDelay = Math.round(Math.max(0, actualStartTime - now));
             turn.metrics.audioBufferDelayMs = bufferDelay;
             turn.metrics.playbackStartedAtMs = Date.now() + bufferDelay;
-
-            if (turn.metrics.speechStoppedAtMs) {
-              turn.metrics.e2eLatencyMs = turn.metrics.playbackStartedAtMs - turn.metrics.speechStoppedAtMs;
-            }
-
             this.turnMap.set(responseId, turn);
 
             this.log('info',
@@ -320,12 +315,13 @@ export class VoiceLiveInterpreter {
 
             if (turn.metrics.speechStoppedAtMs) {
               turn.metrics.endLatencyMs = now - turn.metrics.speechStoppedAtMs;
+              turn.metrics.e2eLatencyMs = turn.metrics.endLatencyMs;
             }
 
             this.turnMap.set(event.responseId, turn);
 
             this.log('info', '[server] response.audio.delta (first chunk) - AI starts streaming audio', 'server_event',
-              `responseId: ${event.responseId}\nchunkSize: ${chunk.length} bytes\nNote: User hears audio ~50ms later (player buffer delay)`);
+              `responseId: ${event.responseId}\nchunkSize: ${chunk.length} bytes`);
           }
 
           // Track audio chunks for summary
@@ -398,8 +394,8 @@ export class VoiceLiveInterpreter {
           const fmtTime = (ms: number | undefined) => ms != null ? this.formatTime(ms) : '-';
 
           const e2eLabel = m.e2eLatencyMs != null
-            ? `E2E Latency: ${m.e2eLatencyMs}ms  (speech stopped -> user hears audio)`
-            : `E2E Latency: -  (playback timing not captured)`;
+            ? `E2E Latency: ${m.e2eLatencyMs}ms  (speech stopped -> first audio chunk)`
+            : `E2E Latency: -  (not available)`;
 
           const latencyLines = [
             `Turn #${turnNumber} (${responseId})`,
@@ -409,8 +405,8 @@ export class VoiceLiveInterpreter {
             `  Speech stopped at:     ${fmtTime(m.speechStoppedAtMs)}`,
             `  Response created at:   ${fmtTime(m.startedAtMs)}`,
             m.firstTextDeltaAtMs ? `  First text delta at:   ${fmtTime(m.firstTextDeltaAtMs)}` : null,
-            m.firstAudioDeltaAtMs ? `  First audio delta at:  ${fmtTime(m.firstAudioDeltaAtMs)}  << AI starts streaming audio` : null,
-            m.playbackStartedAtMs ? `  Audio playback at:     ${fmtTime(m.playbackStartedAtMs)}  << User hears audio (+${m.audioBufferDelayMs ?? 50}ms buffer)` : null,
+            m.firstAudioDeltaAtMs ? `  First audio delta at:  ${fmtTime(m.firstAudioDeltaAtMs)}  << First audio chunk from server` : null,
+            m.playbackStartedAtMs ? `  Audio playback at:     ${fmtTime(m.playbackStartedAtMs)}  (user hears audio, +${m.audioBufferDelayMs ?? 0}ms queue delay)` : null,
             `  Response done at:      ${fmtTime(m.finishedAtMs)}`,
             ``,
             `Latency breakdown:`,
@@ -423,17 +419,11 @@ export class VoiceLiveInterpreter {
             m.firstAudioDeltaAtMs
               ? `  Response -> First audio chunk:    ${m.firstAudioDeltaAtMs - m.startedAtMs}ms  (first audio delta - response created)`
               : null,
-            m.audioBufferDelayMs != null
-              ? `  Audio buffer delay:               ${m.audioBufferDelayMs}ms  (player initial buffer before playback)`
-              : null,
-            m.speechStoppedAtMs && m.firstAudioDeltaAtMs
-              ? `  Speech end -> First audio chunk:  ${m.endLatencyMs}ms  (first audio delta - speech stopped)`
-              : null,
             ``,
             `  >>> ${e2eLabel}`,
-            `      = audio playback time - speech stopped time`,
-            m.playbackStartedAtMs && m.speechStoppedAtMs
-              ? `      = ${fmtTime(m.playbackStartedAtMs)} - ${fmtTime(m.speechStoppedAtMs)} = ${m.e2eLatencyMs}ms`
+            `      = first audio delta time - speech stopped time`,
+            m.firstAudioDeltaAtMs && m.speechStoppedAtMs
+              ? `      = ${fmtTime(m.firstAudioDeltaAtMs)} - ${fmtTime(m.speechStoppedAtMs)} = ${m.e2eLatencyMs}ms`
               : null,
             ``,
             `  Total response time:              ${fmt(m.latencyMs)}  (response done - response created)`,
@@ -442,7 +432,7 @@ export class VoiceLiveInterpreter {
               : null,
           ].filter(Boolean).join('\n');
 
-          const latencyLogItem = this.log('info', `Latency - Turn #${turnNumber}: E2E (speech stopped -> user hears audio)`, 'latency', latencyLines);
+          const latencyLogItem = this.log('info', `Latency - Turn #${turnNumber}: E2E (speech stopped -> first audio chunk)`, 'latency', latencyLines);
           latencyLogItem.e2eMs = m.e2eLatencyMs;
 
           if (!turn.ttsLogged) {
