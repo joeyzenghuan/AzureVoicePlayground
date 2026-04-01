@@ -7,6 +7,7 @@ import {
   type VoiceLiveConfig,
 } from '../lib/voiceLive/defaults';
 import { MicCapture } from '../lib/voiceLive/audio/micCapture';
+import { floatTo16BitPCM, int16ToUint8LE } from '../lib/voiceLive/audio/pcm16';
 import {
   VoiceLiveInterpreter,
   DEBUG_CATEGORIES,
@@ -175,6 +176,10 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
   });
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(() => new Set());
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [audioFileStatus, setAudioFileStatus] = useState<string>('');
+  const [isStreamingFile, setIsStreamingFile] = useState(false);
+  const audioFileAbortRef = useRef<AbortController | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [turns, setTurns] = useState(() => 0);
   const [turnMetrics, setTurnMetrics] = useState<TurnMetrics[]>(() => []);
@@ -401,6 +406,85 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
     await micRef.current.stop();
     micRef.current = null;
     setIsMicOn(false);
+  }
+
+  async function streamAudioFile(file: File) {
+    if (!interpreter.snapshot.isConnected) {
+      setAudioFileStatus('Not connected');
+      return;
+    }
+
+    const abort = new AbortController();
+    audioFileAbortRef.current = abort;
+    setIsStreamingFile(true);
+    setAudioFileStatus(`Decoding ${file.name}...`);
+
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const audioCtx = new AudioContext({ sampleRate: config.inputAudioSamplingRate });
+      const decoded = await audioCtx.decodeAudioData(arrayBuf);
+
+      // Get mono channel and resample to target rate
+      const channelData = decoded.getChannelData(0);
+      const targetRate = config.inputAudioSamplingRate;
+      let samples: Float32Array;
+
+      if (decoded.sampleRate !== targetRate) {
+        // Resample using OfflineAudioContext
+        const offlineCtx = new OfflineAudioContext(1, Math.ceil(channelData.length * targetRate / decoded.sampleRate), targetRate);
+        const source = offlineCtx.createBufferSource();
+        source.buffer = decoded;
+        source.connect(offlineCtx.destination);
+        source.start();
+        const rendered = await offlineCtx.startRendering();
+        samples = rendered.getChannelData(0);
+      } else {
+        samples = channelData;
+      }
+
+      await audioCtx.close();
+
+      // Stream in chunks at real-time pace
+      const chunkSize = 4096; // samples per chunk
+      const chunkDurationMs = (chunkSize / targetRate) * 1000;
+      const totalChunks = Math.ceil(samples.length / chunkSize);
+      const totalDuration = (samples.length / targetRate).toFixed(1);
+
+      setAudioFileStatus(`Streaming ${file.name} (${totalDuration}s)...`);
+
+      for (let i = 0; i < totalChunks; i++) {
+        if (abort.signal.aborted) {
+          setAudioFileStatus('Streaming cancelled');
+          break;
+        }
+
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, samples.length);
+        const chunk = samples.slice(start, end);
+        const pcm16 = floatTo16BitPCM(chunk);
+        const bytes = int16ToUint8LE(pcm16);
+
+        await interpreter.sendMicPcmChunk(bytes);
+
+        // Pace at real-time speed
+        if (i < totalChunks - 1) {
+          await new Promise((r) => setTimeout(r, chunkDurationMs));
+        }
+      }
+
+      if (!abort.signal.aborted) {
+        setAudioFileStatus(`Done streaming ${file.name}`);
+      }
+    } catch (e) {
+      setAudioFileStatus(e instanceof Error ? e.message : 'Failed to process audio');
+    } finally {
+      setIsStreamingFile(false);
+      audioFileAbortRef.current = null;
+    }
+  }
+
+  function cancelAudioFileStream() {
+    audioFileAbortRef.current?.abort();
   }
 
   const allSelected = enabledCategories.size === ALL_CATEGORIES.length;
@@ -842,15 +926,62 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
             )}
           </div>
 
-          {/* Mic Status */}
+          {/* Mic Status & Audio File Upload */}
           {isConnected && (
-            <div className={`flex items-center gap-2 p-3 rounded-md ${isMicOn ? 'bg-green-50 border border-green-200' : 'bg-gray-100 border border-gray-200'}`}>
-              <svg className={`w-5 h-5 ${isMicOn ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-              <span className={`text-sm font-medium ${isMicOn ? 'text-green-700' : 'text-gray-500'}`}>
-                {isMicOn ? 'Microphone active' : 'Microphone off'}
-              </span>
+            <div className="space-y-2">
+              <div className={`flex items-center gap-2 p-3 rounded-md ${isMicOn ? 'bg-green-50 border border-green-200' : 'bg-gray-100 border border-gray-200'}`}>
+                <svg className={`w-5 h-5 ${isMicOn ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+                <span className={`text-sm font-medium ${isMicOn ? 'text-green-700' : 'text-gray-500'}`}>
+                  {isMicOn ? 'Microphone active' : 'Microphone off'}
+                </span>
+              </div>
+
+              {/* Audio File Upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) streamAudioFile(file);
+                  e.target.value = '';
+                }}
+              />
+              {isStreamingFile ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 p-2.5 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      <span className="text-xs text-blue-700 truncate">{audioFileStatus}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={cancelAudioFileStream}
+                    className="px-2.5 py-2 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload Audio File
+                </button>
+              )}
+              {audioFileStatus && !isStreamingFile && (
+                <p className="text-xs text-gray-500 text-center">{audioFileStatus}</p>
+              )}
             </div>
           )}
 
