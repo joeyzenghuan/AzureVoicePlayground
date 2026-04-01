@@ -444,19 +444,14 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
       await audioCtx.close();
 
-      // Stream at ~3x real-time speed using mic-sized chunks.
-      // Too slow (1x) = VAD fragments on natural pauses.
-      // Too fast (instant) = server sees data gaps between bursts, creates 4-6ms artifacts.
-      // 3x is a good balance: fast enough for testing, steady enough for clean VAD.
-      const speedMultiplier = 3;
-      const chunkSize = 4096; // same as mic capture
-      const chunkDurationMs = (chunkSize / targetRate) * 1000;
-      const sendIntervalMs = chunkDurationMs / speedMultiplier;
+      // Stream at real-time speed with mic-sized chunks to faithfully
+      // simulate live microphone input (same chunk size and timing).
+      const chunkSize = 4096; // same as MicCapture bufferSize
+      const chunkDurationMs = (chunkSize / targetRate) * 1000; // ~256ms at 16kHz
       const totalChunks = Math.ceil(samples.length / chunkSize);
       const totalDuration = (samples.length / targetRate).toFixed(1);
-      const estimatedTime = (samples.length / targetRate / speedMultiplier).toFixed(0);
 
-      setAudioFileStatus(`Streaming ${file.name} (${totalDuration}s audio, ~${estimatedTime}s at ${speedMultiplier}x)...`);
+      setAudioFileStatus(`Streaming ${file.name} (${totalDuration}s)...`);
 
       for (let i = 0; i < totalChunks; i++) {
         if (abort.signal.aborted) {
@@ -472,9 +467,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
         await interpreter.sendMicPcmChunk(bytes);
 
-        // Pace at speedMultiplier × real-time
         if (i < totalChunks - 1) {
-          await new Promise((r) => setTimeout(r, sendIntervalMs));
+          await new Promise((r) => setTimeout(r, chunkDurationMs));
         }
       }
 
