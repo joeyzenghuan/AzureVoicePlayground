@@ -444,9 +444,11 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
       await audioCtx.close();
 
-      // Stream in chunks at real-time pace
-      const chunkSize = 4096; // samples per chunk
-      const chunkDurationMs = (chunkSize / targetRate) * 1000;
+      // Send audio in large chunks as fast as possible.
+      // The server's input audio buffer accumulates the data and VAD
+      // processes the full waveform, producing much better segmentation
+      // than drip-feeding at real-time pace.
+      const chunkSize = 32000; // ~1s of audio per send at 16kHz (larger chunks = fewer sends)
       const totalChunks = Math.ceil(samples.length / chunkSize);
       const totalDuration = (samples.length / targetRate).toFixed(1);
 
@@ -466,9 +468,9 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
         await interpreter.sendMicPcmChunk(bytes);
 
-        // Pace at real-time speed
-        if (i < totalChunks - 1) {
-          await new Promise((r) => setTimeout(r, chunkDurationMs));
+        // Small yield to keep UI responsive, no real-time pacing
+        if (i % 4 === 3) {
+          await new Promise((r) => setTimeout(r, 0));
         }
       }
 
