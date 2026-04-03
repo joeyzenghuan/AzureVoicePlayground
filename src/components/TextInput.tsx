@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { WordBoundary, SynthesisState } from '../types/azure';
 import { getLanguageFromVoice, getPresetsForLanguage } from '../utils/languagePresets';
 import { buildPersonalVoiceSsml } from '../lib/personalVoice/personalVoiceClient';
@@ -21,6 +21,10 @@ interface TextInputProps {
   personalVoiceInfo?: PersonalVoiceInfo;
   selectedPresetLanguage: string;
   onPresetLanguageChange: (language: string) => void;
+  ssmlMode: boolean;
+  onSsmlModeChange: (enabled: boolean) => void;
+  ssmlText: string;
+  onSsmlTextChange: (ssml: string) => void;
 }
 
 export function TextInput({
@@ -33,10 +37,13 @@ export function TextInput({
   personalVoiceInfo,
   selectedPresetLanguage,
   onPresetLanguageChange,
+  ssmlMode,
+  onSsmlModeChange,
+  ssmlText,
+  onSsmlTextChange,
 }: TextInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
-  const [showSSML, setShowSSML] = useState(false);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const charCount = text.length;
@@ -52,7 +59,7 @@ export function TextInput({
     const preset = currentPresets[presetKey as keyof typeof currentPresets];
     if (preset) {
       onTextChange(preset);
-      setShowSSML(false); // Reset to plain text view when loading preset
+      onSsmlModeChange(false); // Reset to plain text view when loading preset
     }
   };
 
@@ -205,7 +212,7 @@ export function TextInput({
 </speak>`;
   };
 
-  const displayText = showSSML ? generateSSML() : text;
+  const displayText = ssmlMode ? ssmlText : text;
 
   return (
     <div className="h-full flex flex-col">
@@ -329,23 +336,43 @@ export function TextInput({
         <textarea
           ref={textareaRef}
           value={displayText}
-          onChange={(e) => !showSSML && onTextChange(e.target.value)}
+          onChange={(e) => {
+            if (ssmlMode) {
+              onSsmlTextChange(e.target.value);
+            } else {
+              onTextChange(e.target.value);
+            }
+          }}
           onScroll={handleScroll}
-          placeholder="Enter text here to convert to speech..."
-          readOnly={showSSML}
+          placeholder={ssmlMode ? "Edit SSML markup here..." : "Enter text here to convert to speech..."}
           className="w-full h-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none font-mono text-base leading-6"
-          style={{ position: 'relative', zIndex: 2, background: showSSML ? '#f9fafb' : 'transparent' }}
+          style={{ position: 'relative', zIndex: 2, background: ssmlMode ? '#f0f7ff' : 'transparent' }}
         />
       </div>
 
       <div className="mt-4 flex gap-2">
         <button
-          onClick={() => setShowSSML(!showSSML)}
-          disabled={!text}
+          onClick={() => {
+            if (!ssmlMode) {
+              // Switching to SSML mode: generate SSML from current plain text
+              onSsmlTextChange(generateSSML());
+            }
+            onSsmlModeChange(!ssmlMode);
+          }}
+          disabled={!text && !ssmlMode}
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {showSSML ? 'Show Plain Text' : 'Show SSML'}
+          {ssmlMode ? 'Show Plain Text' : 'Edit SSML'}
         </button>
+        {ssmlMode && (
+          <button
+            onClick={() => onSsmlTextChange(generateSSML())}
+            disabled={!text}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Regenerate SSML
+          </button>
+        )}
         <button
           onClick={() => onTextChange('')}
           disabled={!text}

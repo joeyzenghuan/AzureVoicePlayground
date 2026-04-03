@@ -38,6 +38,7 @@ export function useAzureTTS(settings: AzureSettings) {
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(-1);
   const [audioData, setAudioData] = useState<ArrayBuffer | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
 
   // Use a ref to always have the latest settings
   const settingsRef = useRef(settings);
@@ -158,8 +159,8 @@ export function useAzureTTS(settings: AzureSettings) {
   }, []);
 
   const synthesize = useCallback(
-    async (text: string, locale?: string) => {
-      if (!text.trim()) {
+    async (text: string, locale?: string, ssml?: string) => {
+      if (!text.trim() && !ssml?.trim()) {
         setError('Please enter some text to synthesize');
         return;
       }
@@ -176,6 +177,7 @@ export function useAzureTTS(settings: AzureSettings) {
       useFallbackPlaybackRef.current = false;
       inputTextRef.current = text;
       setLatencyMs(null);
+      setResultId(null);
 
       const synthesizer = await initializeSynthesizer();
 
@@ -331,7 +333,7 @@ export function useAzureTTS(settings: AzureSettings) {
         }
       };
 
-      // Start synthesis - use SSML for personal voices, plain text for regular voices
+      // Start synthesis - use user-provided SSML if given, else SSML for personal voices, else plain text
       // Use settingsRef.current to get the latest settings value
       const currentSettings = settingsRef.current;
       const isPersonalVoice = currentSettings.personalVoiceInfo?.isPersonalVoice && currentSettings.personalVoiceInfo?.speakerProfileId;
@@ -341,12 +343,39 @@ export function useAzureTTS(settings: AzureSettings) {
       console.log('isPersonalVoice:', isPersonalVoice);
       console.log('selectedVoice:', currentSettings.selectedVoice);
       console.log('locale:', locale);
+      console.log('userSSML:', ssml ? 'yes' : 'no');
       console.log('=======================');
 
       // Record start time for latency measurement (time to first audio byte)
       synthesisStartTimeRef.current = Date.now();
 
-      if (isPersonalVoice) {
+      if (ssml) {
+        // User-edited SSML mode
+        console.log('Using user-provided SSML');
+        console.log('SSML:', ssml);
+
+        synthesizer.speakSsmlAsync(
+          ssml,
+          (result) => {
+            logSynthesisLatencies(result);
+            if (result.resultId) {
+              setResultId(result.resultId);
+            }
+            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+              console.log('SSML synthesis completed successfully');
+            } else {
+              console.error('SSML synthesis failed:', result.errorDetails);
+              setError(result.errorDetails || 'Synthesis failed');
+              setState('error');
+            }
+          },
+          (error) => {
+            console.error('SSML synthesis error:', error);
+            setError(error);
+            setState('error');
+          }
+        );
+      } else if (isPersonalVoice) {
         const model = currentSettings.personalVoiceInfo!.model || 'DragonLatestNeural';
         const ssmlLocale = locale || 'en-US';
         const ssml = buildPersonalVoiceSsml(
@@ -362,6 +391,9 @@ export function useAzureTTS(settings: AzureSettings) {
           ssml,
           (result) => {
             logSynthesisLatencies(result);
+            if (result.resultId) {
+              setResultId(result.resultId);
+            }
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
               console.log('Personal voice synthesis completed successfully');
             } else {
@@ -381,6 +413,9 @@ export function useAzureTTS(settings: AzureSettings) {
           text,
           (result) => {
             logSynthesisLatencies(result);
+            if (result.resultId) {
+              setResultId(result.resultId);
+            }
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
               console.log('Synthesis completed successfully');
             } else {
@@ -447,6 +482,7 @@ export function useAzureTTS(settings: AzureSettings) {
     currentWordIndex,
     audioData,
     latencyMs,
+    resultId,
     synthesize,
     pause,
     resume,
