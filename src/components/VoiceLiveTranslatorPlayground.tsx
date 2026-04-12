@@ -160,6 +160,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
   const [statusText, setStatusText] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
   const [isMicOn, setIsMicOn] = useState(false);
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [isManualTurnActive, setIsManualTurnActive] = useState(false);
   const [logs, setLogs] = useState<SessionLogItem[]>([]);
   const [debugMode, setDebugMode] = useState(() => {
     return localStorage.getItem('voicelive.translator.debugMode') === 'true';
@@ -207,6 +209,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
     interpreterRef.current = new VoiceLiveInterpreter({
       onState: (s) => {
         setIsConnected(s.isConnected);
+        setIsManualMode(s.isManualMode);
+        setIsManualTurnActive(s.isManualTurnActive);
         setLogs(s.logs);
         setTurns(s.totals.turns);
         setTurnMetrics(s.turns);
@@ -272,7 +276,11 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
   const sessionTimeSeconds = sessionStartMs > 0 ? (Date.now() - sessionStartMs) / 1000 : 0;
   const avgE2eLatency = e2eLatencies.length > 0 ? calculateAverage(e2eLatencies) : 0;
+  const p50E2eLatency = e2eLatencies.length > 0 ? calculatePercentile(e2eLatencies, 50) : 0;
   const p90E2eLatency = e2eLatencies.length > 0 ? calculatePercentile(e2eLatencies, 90) : 0;
+  const inputAudioDurationMs = turnMetrics.reduce((s, t) =>
+    s + (t.speechStartedAtMs && t.speechStoppedAtMs ? Math.max(0, t.speechStoppedAtMs - t.speechStartedAtMs) : 0), 0);
+  const inputAudioDurationSeconds = inputAudioDurationMs / 1000;
 
   const pricingTier = useMemo(() => {
     const modelOption = MODEL_OPTIONS.find((m) => m.id === config.model);
@@ -302,6 +310,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
     config.voiceProvider
   );
   const costPerSecond = sessionTimeSeconds > 0 ? totalCost / sessionTimeSeconds : 0;
+  const costPerInput = inputAudioDurationSeconds > 0 ? totalCost / inputAudioDurationSeconds : 0;
 
   const visibleLogs = useMemo(() => {
     if (!debugMode) {
@@ -375,6 +384,16 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
     }
   }
 
+  async function onUpdateSession() {
+    setStatusText('Updating session...');
+    try {
+      await interpreter.applyConfig({ ...config, endpoint, apiKey });
+      setStatusText('Session updated');
+    } catch (e) {
+      setStatusText(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   async function startMic() {
     if (isMicOn) return;
     if (!interpreter.snapshot.isConnected) {
@@ -413,6 +432,10 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
       setAudioFileStatus('Not connected');
       return;
     }
+
+    // Pause mic while streaming audio file
+    const wasMicOn = isMicOn;
+    if (wasMicOn) await stopMic();
 
     const abort = new AbortController();
     audioFileAbortRef.current = abort;
@@ -480,6 +503,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
     } finally {
       setIsStreamingFile(false);
       audioFileAbortRef.current = null;
+      // Restore mic if it was on before streaming
+      if (wasMicOn && interpreter.snapshot.isConnected) await startMic();
     }
   }
 
@@ -522,7 +547,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
 
         {/* Statistics Bar */}
         <div className="bg-white border-b border-gray-200 p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-3">
             <div className="bg-gray-50 rounded-lg p-2.5">
               <p className="text-xs text-gray-500">Turns</p>
               <p className="text-sm font-semibold text-gray-900">{turns}</p>
@@ -540,8 +565,16 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
               <p className="text-sm font-semibold text-gray-900">${costPerSecond.toFixed(5)}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-2.5">
+              <p className="text-xs text-gray-500">Cost/Input</p>
+              <p className="text-sm font-semibold text-gray-900">${costPerInput.toFixed(5)}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-2.5">
               <p className="text-xs text-gray-500">Avg E2E Latency</p>
               <p className="text-sm font-semibold text-gray-900">{formatMs(avgE2eLatency)}</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-2.5">
+              <p className="text-xs text-gray-500">P50 E2E Latency</p>
+              <p className="text-sm font-semibold text-gray-900">{formatMs(p50E2eLatency)}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-2.5">
               <p className="text-xs text-gray-500">P90 E2E Latency</p>
@@ -549,7 +582,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
             </div>
             <div className="bg-gray-50 rounded-lg p-2.5">
               <p className="text-xs text-gray-500">Input Audio</p>
-              <p className="text-sm font-semibold text-gray-900">{inputAudioSeconds.toFixed(1)}s</p>
+              <p className="text-sm font-semibold text-gray-900">{inputAudioDurationSeconds.toFixed(1)}s</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-2.5">
               <p className="text-xs text-gray-500">Output Audio</p>
@@ -914,29 +947,87 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                 Start Translation
               </button>
             ) : (
-              <button
-                onClick={onDisconnect}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 6h12v12H6z" />
-                </svg>
-                Stop
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={onDisconnect}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 6h12v12H6z" />
+                  </svg>
+                  Stop
+                </button>
+                <button
+                  onClick={onUpdateSession}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
+                  title="Apply current config to the running session"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Update
+                </button>
+              </div>
             )}
           </div>
 
           {/* Mic Status & Audio File Upload */}
           {isConnected && (
             <div className="space-y-2">
-              <div className={`flex items-center gap-2 p-3 rounded-md ${isMicOn ? 'bg-green-50 border border-green-200' : 'bg-gray-100 border border-gray-200'}`}>
-                <svg className={`w-5 h-5 ${isMicOn ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                </svg>
-                <span className={`text-sm font-medium ${isMicOn ? 'text-green-700' : 'text-gray-500'}`}>
-                  {isMicOn ? 'Microphone active' : 'Microphone off'}
-                </span>
-              </div>
+              {/* Mic toggle (non-manual mode) */}
+              {!isManualMode && (
+                <button
+                  onClick={() => isMicOn ? stopMic() : startMic()}
+                  disabled={isStreamingFile}
+                  className={`w-full flex items-center gap-2 p-3 rounded-md transition-colors ${
+                    isStreamingFile
+                      ? 'bg-gray-100 border border-gray-200 cursor-not-allowed opacity-60'
+                      : isMicOn
+                        ? 'bg-green-50 border border-green-200 hover:bg-green-100'
+                        : 'bg-gray-100 border border-gray-200 hover:bg-gray-200'
+                  }`}
+                >
+                  {isMicOn ? (
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                    </svg>
+                  )}
+                  <span className={`text-sm font-medium ${isMicOn ? 'text-green-700' : 'text-gray-500'}`}>
+                    {isStreamingFile ? 'Mic paused (streaming file)' : isMicOn ? 'Microphone ON' : 'Microphone OFF'}
+                  </span>
+                </button>
+              )}
+
+              {/* Push-to-Talk button (manual mode) */}
+              {isManualMode && (
+                <button
+                  onMouseDown={() => { if (isMicOn) void interpreter.startTurn(); }}
+                  onMouseUp={() => void interpreter.endTurn()}
+                  onMouseLeave={() => { if (isManualTurnActive) void interpreter.endTurn(); }}
+                  onTouchStart={(e) => { e.preventDefault(); if (isMicOn) void interpreter.startTurn(); }}
+                  onTouchEnd={(e) => { e.preventDefault(); void interpreter.endTurn(); }}
+                  disabled={!isMicOn}
+                  className={`w-full flex items-center justify-center gap-2 p-4 rounded-md transition-colors select-none ${
+                    !isMicOn
+                      ? 'bg-gray-100 border border-gray-200 cursor-not-allowed opacity-60'
+                      : isManualTurnActive
+                        ? 'bg-red-100 border-2 border-red-400 shadow-inner'
+                        : 'bg-blue-50 border-2 border-blue-300 hover:bg-blue-100 active:bg-red-100'
+                  }`}
+                >
+                  <svg className={`w-6 h-6 ${isManualTurnActive ? 'text-red-600 animate-pulse' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                  <span className={`text-sm font-bold ${isManualTurnActive ? 'text-red-700' : 'text-blue-700'}`}>
+                    {isManualTurnActive ? 'Recording... Release to translate' : 'Hold to Talk'}
+                  </span>
+                </button>
+              )}
 
               {/* Audio File Upload */}
               <input
@@ -1095,8 +1186,12 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                     >
                       <option value="server_vad">server_vad</option>
                       <option value="azure_semantic_vad">azure_semantic_vad</option>
+                      <option value="azure_semantic_vad_multilingual">azure_semantic_vad_multilingual</option>
+                      <option value="manual">Manual (push-to-talk)</option>
                     </select>
                   </Field>
+                  {config.turnDetectionType !== 'manual' && (
+                    <>
                   <Field label="Threshold" info="VAD activation threshold (0.0-1.0). Higher values require louder/clearer speech to trigger detection. Lower values are more sensitive but may pick up background noise.">
                     <input type="number" min={0} max={1} step={0.05} value={config.threshold}
                       onChange={(e) => setConfig((c) => ({ ...c, threshold: parseFloat(e.target.value) || 0 }))}
@@ -1112,7 +1207,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                       onChange={(e) => setConfig((c) => ({ ...c, silenceDurationInMs: parseInt(e.target.value) || 0 }))}
                       className={inputCls} />
                   </Field>
-                  {config.turnDetectionType === 'azure_semantic_vad' && (
+                  {(config.turnDetectionType === 'azure_semantic_vad' || config.turnDetectionType === 'azure_semantic_vad_multilingual') && (
                     <>
                       <Field label="Speech Duration (ms)" info="Minimum speech duration (ms) to be considered valid input. Filters out very short sounds like coughs or clicks. Semantic VAD only.">
                         <input type="number" min={0} step={10} value={config.speechDurationInMs}
@@ -1152,6 +1247,8 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                       <option value="false">Off</option>
                     </select>
                   </Field>
+                    </>
+                  )}
                 </SettingsGroup>
 
                 {/* ── Voice ── */}
@@ -1163,7 +1260,7 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                         const p = e.target.value as VoiceLiveConfig['voiceProvider'];
                         const defaults: Record<string, string> = {
                           'openai': 'alloy',
-                          'azure-standard': 'en-US-AvaMultilingualNeural',
+                          'azure-standard': 'zh-CN-Yunxiao:DragonHDFlashLatestNeural',
                           'azure-personal': '',
                           'azure-custom': '',
                         };
@@ -1199,19 +1296,42 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                       </select>
                     </Field>
                   )}
-                  {config.voiceProvider === 'azure-standard' && (
-                    <Field label="Voice Name" info="Azure neural voice name.">
-                      <select value={config.voiceName}
-                        onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
-                        className={selectCls}>
-                        <option value="en-US-AvaMultilingualNeural">Ava (Female, conversational)</option>
-                        <option value="en-US-Ava:DragonHDLatestNeural">Ava HD (Female, friendly)</option>
-                        <option value="en-US-AndrewMultilingualNeural">Andrew (Male, conversational)</option>
-                        <option value="en-US-GuyMultilingualNeural">Guy (Male, professional)</option>
-                        <option value="zh-CN-XiaochenMultilingualNeural">Xiaochen (Female, assistant)</option>
-                      </select>
-                    </Field>
-                  )}
+                  {config.voiceProvider === 'azure-standard' && (() => {
+                    const presetVoices = [
+                      { value: 'zh-CN-Yunxiao:DragonHDFlashLatestNeural', label: 'Yunxiao HD Flash (Male, Chinese)' },
+                      { value: 'zh-CN-Xiaoxiao:DragonHDFlashLatestNeural', label: 'Xiaoxiao HD Flash (Female, Chinese)' },
+                      { value: 'en-US-AvaMultilingualNeural', label: 'Ava (Female, conversational)' },
+                      { value: 'en-US-Ava:DragonHDLatestNeural', label: 'Ava HD (Female, friendly)' },
+                      { value: 'en-US-AndrewMultilingualNeural', label: 'Andrew (Male, conversational)' },
+                      { value: 'en-US-GuyMultilingualNeural', label: 'Guy (Male, professional)' },
+                      { value: 'zh-CN-XiaochenMultilingualNeural', label: 'Xiaochen (Female, assistant)' },
+                    ];
+                    const isCustom = !presetVoices.some((v) => v.value === config.voiceName);
+                    return (
+                      <Field label="Voice Name" info="Azure neural voice name. Select a preset or choose 'Custom' to enter any voice ID.">
+                        <select value={isCustom ? '__custom__' : config.voiceName}
+                          onChange={(e) => {
+                            if (e.target.value === '__custom__') {
+                              setConfig((c) => ({ ...c, voiceName: '' }));
+                            } else {
+                              setConfig((c) => ({ ...c, voiceName: e.target.value }));
+                            }
+                          }}
+                          className={selectCls}>
+                          {presetVoices.map((v) => (
+                            <option key={v.value} value={v.value}>{v.label}</option>
+                          ))}
+                          <option value="__custom__">Custom...</option>
+                        </select>
+                        {isCustom && (
+                          <input type="text" value={config.voiceName}
+                            onChange={(e) => setConfig((c) => ({ ...c, voiceName: e.target.value }))}
+                            placeholder="e.g. en-US-JennyNeural" className={inputCls}
+                            style={{ marginTop: 6 }} />
+                        )}
+                      </Field>
+                    );
+                  })()}
                   {config.voiceProvider === 'azure-personal' && (
                     <>
                       <Field label="Personal Voice Name" info="The name/ID of your personal voice speaker profile. Create one via Azure AI Speech portal.">
@@ -1286,6 +1406,13 @@ export function VoiceLiveTranslatorPlayground({ endpoint, apiKey }: VoiceLiveTra
                           placeholder="Not set" className={inputCls} />
                       </Field>
                     </>
+                  )}
+                  {config.voiceProvider !== 'openai' && (
+                    <Field label="Custom Lexicon URL" info="URL to a PLS (Pronunciation Lexicon Specification) XML file hosted on Azure Blob Storage. Used to correct pronunciation of domain-specific terms, proper nouns, or polyphones (e.g. 丽水 → lí shuǐ).">
+                      <input type="text" value={config.customLexiconUrl ?? ''}
+                        onChange={(e) => setConfig((c) => ({ ...c, customLexiconUrl: e.target.value || undefined }))}
+                        placeholder="https://<storage>.blob.core.windows.net/<container>/lexicon.xml" className={inputCls} />
+                    </Field>
                   )}
                 </SettingsGroup>
 

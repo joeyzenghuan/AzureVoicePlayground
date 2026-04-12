@@ -64,7 +64,7 @@ export type VoiceLiveConfig = {
   phraseList?: string;
 
   // Turn Detection (VAD)
-  turnDetectionType: 'server_vad' | 'azure_semantic_vad';
+  turnDetectionType: 'server_vad' | 'azure_semantic_vad' | 'azure_semantic_vad_multilingual' | 'manual';
   threshold: number;
   prefixPaddingInMs: number;
   silenceDurationInMs: number;
@@ -89,6 +89,7 @@ export type VoiceLiveConfig = {
   voiceTemperature?: number;
   voiceEndpointId?: string;
   voiceModel?: string;
+  customLexiconUrl?: string;
 
   // Audio Format
   inputAudioFormat: string;
@@ -120,7 +121,7 @@ export const DEFAULT_CONFIG: VoiceLiveConfig = {
   eouTimeoutInMs: 1000,
 
   voiceProvider: 'azure-standard',
-  voiceName: 'en-US-AvaMultilingualNeural',
+  voiceName: 'zh-CN-Yunxiao:DragonHDFlashLatestNeural',
 
   inputAudioFormat: 'pcm16',
   inputAudioSamplingRate: 16000,
@@ -147,8 +148,12 @@ function optField<T>(val: T | undefined | null): T | undefined {
 }
 
 export function toRequestSession(config: VoiceLiveConfig): RequestSession {
+  // When using azure-speech ASR, only azure_semantic_vad variants are supported;
+  // if user picked server_vad, fall back to azure_semantic_vad.
   const effectiveTurnDetectionType =
-    config.asrModel === 'azure-speech' ? 'azure_semantic_vad' : config.turnDetectionType;
+    config.asrModel === 'azure-speech' && config.turnDetectionType === 'server_vad'
+      ? 'azure_semantic_vad'
+      : config.turnDetectionType;
 
   const baseTurnDetection = {
     threshold: config.threshold,
@@ -159,18 +164,22 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
     ...(config.autoTruncate != null && { autoTruncate: config.autoTruncate }),
   };
 
-  const turnDetection: TurnDetectionUnion =
-    effectiveTurnDetectionType === 'server_vad'
-      ? { type: 'server_vad', ...baseTurnDetection }
-      : {
-          type: 'azure_semantic_vad',
-          ...baseTurnDetection,
-          speechDurationInMs: config.speechDurationInMs,
-          removeFillerWords: config.removeFillerWords,
-          ...(config.vadLanguages && {
-            languages: config.vadLanguages.split(',').map((s) => s.trim()).filter(Boolean),
-          }),
-        };
+  // In manual (push-to-talk) mode, use server_vad but with createResponse=false
+  // so the server doesn't auto-trigger responses; the client controls turns manually.
+  const turnDetection: TurnDetectionUnion | undefined =
+    effectiveTurnDetectionType === 'manual'
+      ? { type: 'server_vad', ...baseTurnDetection, createResponse: false }
+      : effectiveTurnDetectionType === 'server_vad'
+        ? { type: 'server_vad', ...baseTurnDetection }
+        : {
+            type: effectiveTurnDetectionType as 'azure_semantic_vad' | 'azure_semantic_vad_multilingual',
+            ...baseTurnDetection,
+            speechDurationInMs: config.speechDurationInMs,
+            removeFillerWords: config.removeFillerWords,
+            ...(config.vadLanguages && {
+              languages: config.vadLanguages.split(',').map((s) => s.trim()).filter(Boolean),
+            }),
+          };
 
   const asrLanguages = config.asrLanguages
     .split(',')
@@ -206,6 +215,7 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
         name: config.voiceName,
         model: config.voiceModel || 'DragonLatestNeural',
         ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
+        ...(optField(config.customLexiconUrl) && { custom_lexicon_url: config.customLexiconUrl }),
       };
       break;
     case 'azure-custom':
@@ -215,10 +225,16 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
         ...(optField(config.voiceEndpointId) && { endpointId: config.voiceEndpointId }),
         ...(config.voiceTemperature != null && { temperature: config.voiceTemperature }),
         ...azureSsmlProps,
+        ...(optField(config.customLexiconUrl) && { custom_lexicon_url: config.customLexiconUrl }),
       };
       break;
     default: // azure-standard
-      voice = { type: 'azure-standard', name: config.voiceName, ...azureSsmlProps };
+      voice = {
+        type: 'azure-standard',
+        name: config.voiceName,
+        ...azureSsmlProps,
+        ...(optField(config.customLexiconUrl) && { custom_lexicon_url: config.customLexiconUrl }),
+      };
       break;
   }
 
@@ -232,8 +248,8 @@ export function toRequestSession(config: VoiceLiveConfig): RequestSession {
     turnDetection,
     ...(config.temperature != null && { temperature: config.temperature }),
     ...(config.maxResponseOutputTokens != null && { maxResponseOutputTokens: config.maxResponseOutputTokens }),
-    ...(config.noiseReduction != null && {
-      inputAudioNoiseReduction: { type: 'server_noise_reduction' } as any,
+    ...(config.noiseReduction != null && config.noiseReduction && {
+      inputAudioNoiseReduction: { type: 'azure_deep_noise_suppression' } as any,
     }),
     ...(config.echoCancellation != null && config.echoCancellation && {
       inputAudioEchoCancellation: { type: 'server_echo_cancellation' } as any,

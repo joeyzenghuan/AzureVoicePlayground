@@ -11,6 +11,8 @@ import {
   type ServerEventConversationItemInputAudioTranscriptionDelta,
   type ServerEventConversationItemInputAudioTranscriptionCompleted,
   type ServerEventError,
+  type ServerEventSessionCreated,
+  type ServerEventSessionUpdated,
   type VoiceLiveSessionHandlers,
 } from '@azure/ai-voicelive';
 import type { VoiceLiveConfig } from './defaults';
@@ -63,6 +65,8 @@ export type SessionLogItem = {
 export type InterpreterState = {
   isConnected: boolean;
   isMicOn: boolean;
+  isManualMode: boolean;
+  isManualTurnActive: boolean;
   logs: SessionLogItem[];
   turns: TurnMetrics[];
   totals: Totals;
@@ -86,6 +90,8 @@ export class VoiceLiveInterpreter {
   private state: InterpreterState = {
     isConnected: false,
     isMicOn: false,
+    isManualMode: false,
+    isManualTurnActive: false,
     logs: [],
     turns: [],
     totals: EMPTY_TOTALS,
@@ -96,10 +102,17 @@ export class VoiceLiveInterpreter {
   private outputSampleRateHz = 24000;
   private currentSpeechStartMs = 0;
   private currentSpeechStopMs = 0;
+  /** Speech start time frozen at the moment speech stops, so a later speech_started can't overwrite it */
+  private completedSpeechStartMs = 0;
+  /** True after a response consumes the speech timing; prevents semantic VAD re-segments from overwriting */
+  private speechStartConsumed = true;
   private pricingTier: VoiceLiveTier = 'standard';
   private voiceProvider: string = 'azure-standard';
   private audioChunkTracker = new Map<string, { count: number; totalBytes: number }>();
   private pendingUserTranscript: string | undefined;
+  private manualMode = false;
+  private manualTurnActive = false;
+  private manualTurnId?: string;
 
   private readonly events: InterpreterEvents;
 
@@ -153,6 +166,9 @@ export class VoiceLiveInterpreter {
     const modelOption = MODEL_OPTIONS.find((m) => m.id === config.model);
     this.pricingTier = modelOption?.tier === 'basic' ? 'standard' : (modelOption?.tier as VoiceLiveTier) ?? 'standard';
     this.voiceProvider = config.voiceProvider;
+    this.manualMode = config.turnDetectionType === 'manual';
+    this.manualTurnActive = false;
+    this.manualTurnId = undefined;
 
     this.log('info', 'Connecting...', 'session');
 
@@ -177,6 +193,16 @@ export class VoiceLiveInterpreter {
         this.log('info', `Connected (sessionId=${ctx.sessionId ?? 'n/a'})`, 'session');
         this.log('info', '[server] session.connected', 'server_event',
           `sessionId: ${ctx.sessionId ?? 'n/a'}`);
+      },
+      onSessionCreated: async (event: ServerEventSessionCreated) => {
+        console.log('[VoiceLive Event] onSessionCreated', event);
+        this.log('info', '[server] session.created', 'server_event',
+          JSON.stringify(event.session, null, 2));
+      },
+      onSessionUpdated: async (event: ServerEventSessionUpdated) => {
+        console.log('[VoiceLive Event] onSessionUpdated', event);
+        this.log('info', '[server] session.updated', 'server_event',
+          JSON.stringify(event.session, null, 2));
       },
       onDisconnected: async (args) => {
         console.log('[VoiceLive Event] onDisconnected', args);
@@ -220,6 +246,12 @@ export class VoiceLiveInterpreter {
       onInputAudioBufferSpeechStopped: async () => {
         console.log('[VoiceLive Event] onInputAudioBufferSpeechStopped');
         this.currentSpeechStopMs = Date.now();
+        // Only capture speech start for the first segment; semantic VAD may fire
+        // multiple speech_started/stopped pairs for one logical utterance
+        if (this.speechStartConsumed) {
+          this.completedSpeechStartMs = this.currentSpeechStartMs;
+          this.speechStartConsumed = false;
+        }
         const duration = this.currentSpeechStartMs > 0
           ? this.currentSpeechStopMs - this.currentSpeechStartMs
           : 0;
@@ -233,11 +265,12 @@ export class VoiceLiveInterpreter {
         const metrics: TurnMetrics = {
           responseId,
           startedAtMs: Date.now(),
-          speechStartedAtMs: this.currentSpeechStartMs,
+          speechStartedAtMs: this.completedSpeechStartMs,
           speechStoppedAtMs: this.currentSpeechStopMs,
           userTranscript: this.pendingUserTranscript,
         };
         this.pendingUserTranscript = undefined;
+        this.speechStartConsumed = true;
         this.turnMap.set(responseId, { metrics, textBuffer: '' });
         this.audioChunkTracker.set(responseId, { count: 0, totalBytes: 0 });
 
@@ -501,13 +534,18 @@ export class VoiceLiveInterpreter {
 
     this.setState({
       isConnected: true,
+      isManualMode: this.manualMode,
+      isManualTurnActive: false,
       totals: { ...this.state.totals, sessionStartMs: Date.now() },
     });
-    this.log('info', `Session configured (model=${config.model})`, 'session');
+    this.log('info', `Session configured (model=${config.model}${this.manualMode ? ', mode=push-to-talk' : ''})`, 'session');
   }
 
   async disconnect() {
     this.setState({ isMicOn: false });
+    this.manualMode = false;
+    this.manualTurnActive = false;
+    this.manualTurnId = undefined;
 
     try {
       this.pcmPlayer.stop();
@@ -521,7 +559,7 @@ export class VoiceLiveInterpreter {
     } finally {
       this.turnMap.clear();
       this.audioChunkTracker.clear();
-      this.setState({ isConnected: false });
+      this.setState({ isConnected: false, isManualMode: false, isManualTurnActive: false });
       this.log('info', 'Disconnected', 'session');
     }
   }
@@ -570,6 +608,45 @@ export class VoiceLiveInterpreter {
 
   async sendMicPcmChunk(pcm16leBytes: Uint8Array) {
     if (!this.session) return;
+    // In manual mode, only send audio when a turn is active
+    if (this.manualMode && !this.manualTurnActive) return;
     await this.session.sendAudio(pcm16leBytes);
+  }
+
+  async startTurn() {
+    if (!this.session) throw new Error('Not connected');
+    if (this.manualTurnActive) return;
+    this.manualTurnActive = true;
+    this.currentSpeechStartMs = Date.now();
+    this.completedSpeechStartMs = this.currentSpeechStartMs;
+    this.speechStartConsumed = false;
+    this.setState({ isManualTurnActive: true });
+    this.log('info', 'Push-to-talk: recording started', 'vad');
+    this.log('info', '[client] input_audio.turn.start', 'client_event');
+    this.manualTurnId = await this.session.startAudioTurn();
+  }
+
+  async endTurn() {
+    if (!this.session) throw new Error('Not connected');
+    if (!this.manualTurnActive) return;
+    this.manualTurnActive = false;
+    this.currentSpeechStopMs = Date.now();
+    const duration = this.currentSpeechStartMs > 0
+      ? this.currentSpeechStopMs - this.currentSpeechStartMs
+      : 0;
+    this.setState({ isManualTurnActive: false });
+    this.log('info', `Push-to-talk: recording stopped (${duration}ms)`, 'vad');
+    this.log('info', '[client] input_audio.turn.end', 'client_event',
+      `duration: ${duration}ms`);
+    await this.session.endAudioTurn(this.manualTurnId);
+    this.manualTurnId = undefined;
+
+    // Manually trigger response since createResponse is false in manual mode
+    this.log('info', '[client] response.create', 'client_event',
+      `modalities: text, audio (manual trigger)`);
+    await this.session.sendEvent({
+      type: 'response.create',
+      response: { modalities: ['text', 'audio'] },
+    });
   }
 }
