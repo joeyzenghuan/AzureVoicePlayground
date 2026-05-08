@@ -1,0 +1,1021 @@
+{
+  "experiments": [
+    {
+      "name": "A_semantic_silence400",
+      "description": "semantic_vad | silence=400ms | speech=80ms | prefix=300ms | threshold=0.5",
+      "turnDetectionType": "azure_semantic_vad",
+      "silenceDurationInMs": 400,
+      "speechDurationInMs": 80,
+      "prefixPaddingInMs": 300,
+      "threshold": 0.5
+    },
+    {
+      "name": "B_semantic_silence600",
+      "description": "semantic_vad | silence=600ms | speech=80ms | prefix=300ms | threshold=0.5",
+      "turnDetectionType": "azure_semantic_vad",
+      "silenceDurationInMs": 600,
+      "speechDurationInMs": 80,
+      "prefixPaddingInMs": 300,
+      "threshold": 0.5
+    },
+    {
+      "name": "C_semantic_silence800_speech200",
+      "description": "semantic_vad | silence=800ms | speech=200ms | prefix=300ms | threshold=0.5",
+      "turnDetectionType": "azure_semantic_vad",
+      "silenceDurationInMs": 800,
+      "speechDurationInMs": 200,
+      "prefixPaddingInMs": 300,
+      "threshold": 0.5
+    },
+    {
+      "name": "D_semantic_silence500_speech150",
+      "description": "semantic_vad | silence=500ms | speech=150ms | prefix=300ms | threshold=0.5",
+      "turnDetectionType": "azure_semantic_vad",
+      "silenceDurationInMs": 500,
+      "speechDurationInMs": 150,
+      "prefixPaddingInMs": 300,
+      "threshold": 0.5
+    },
+    {
+      "name": "E_server_vad_silence500",
+      "description": "server_vad | silence=500ms | prefix=500ms | threshold=0.5",
+      "turnDetectionType": "server_vad",
+      "silenceDurationInMs": 500,
+      "speechDurationInMs": 80,
+      "prefixPaddingInMs": 500,
+      "threshold": 0.5
+    },
+    {
+      "name": "F_server_vad_silence800",
+      "description": "server_vad | silence=800ms | prefix=500ms | threshold=0.5",
+      "turnDetectionType": "server_vad",
+      "silenceDurationInMs": 800,
+      "speechDurationInMs": 80,
+      "prefixPaddingInMs": 500,
+      "threshold": 0.5
+    }
+  ],
+  "results": [
+    {
+      "config": {
+        "name": "A_semantic_silence400",
+        "description": "semantic_vad | silence=400ms | speech=80ms | prefix=300ms | threshold=0.5",
+        "turnDetectionType": "azure_semantic_vad",
+        "silenceDurationInMs": 400,
+        "speechDurationInMs": 80,
+        "prefixPaddingInMs": 300,
+        "threshold": 0.5
+      },
+      "turns": 7,
+      "avgE2eLatencyMs": 1680,
+      "p50E2eLatencyMs": 1490,
+      "p90E2eLatencyMs": 2390,
+      "totalCost": "$0.2316",
+      "costPerInputSec": "$0.00364",
+      "inputAudioSec": "63.6s",
+      "outputAudioSec": "71.2s",
+      "sessionSec": "95.4s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3599ms",
+          "e2eLatency": "1450ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004419"
+        },
+        {
+          "turn": "2",
+          "duration": "11793ms",
+          "e2eLatency": "1368ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。但请您放心。",
+          "outputTranslation": "Our platform has always highly valued every guest's feedback, and I fully understand how you feel right now. Encountering such a situation is indeed unpleasant and can really affect your travel mood. But please rest assured.",
+          "cost": "$0.026678"
+        },
+        {
+          "turn": "3",
+          "duration": "3900ms",
+          "e2eLatency": "1493ms",
+          "inputASR": "我们一定会认真对待您的问题，积极为您解决这个问题的。",
+          "outputTranslation": "We will definitely take your issue seriously and actively work to resolve it for you.",
+          "cost": "$0.003325"
+        },
+        {
+          "turn": "4",
+          "duration": "4614ms",
+          "e2eLatency": "1453ms",
+          "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+          "outputTranslation": "I have prepared several solutions for you, and you can choose based on your actual needs.",
+          "cost": "$0.017062"
+        },
+        {
+          "turn": "5",
+          "duration": "5609ms",
+          "e2eLatency": "1836ms",
+          "inputASR": "首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。",
+          "outputTranslation": "First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay.",
+          "cost": "$0.022361"
+        },
+        {
+          "turn": "6",
+          "duration": "23222ms",
+          "e2eLatency": "2386ms",
+          "inputASR": "第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。",
+          "outputTranslation": "Second, if you are no longer satisfied with this hotel, we can also coordinate a free cancellation of your booking and recommend other hotels nearby of the same or higher grade to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee waiver or upgrading your room type so that you receive some compensation and better service.",
+          "cost": "$0.093096"
+        },
+        {
+          "turn": "7",
+          "duration": "10841ms",
+          "e2eLatency": "1754ms",
+          "inputASR": "请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进。直到问题圆满解决。",
+          "outputTranslation": "Please take some time to consider which option best suits your needs, or if you have other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved.",
+          "cost": "$0.064620"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:09:03.863",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:06.562",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:09:08.425",
+          "text": "🔊 We are very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:09:13.423",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:17.803",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:19.008",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。但请您放心。"
+        },
+        {
+          "timestamp": "10:09:23.029",
+          "text": "🔊 Our platform has always highly valued every guest's feedback, and I fully understand how you feel right now. Encountering such a situation is indeed unpleasant and can really affect your travel mood. But please rest assured."
+        },
+        {
+          "timestamp": "10:09:23.421",
+          "text": "🎤 我们一定会认真对待您的问题，积极为您解决这个问题的。"
+        },
+        {
+          "timestamp": "10:09:24.656",
+          "text": "🔊 We will definitely take your issue seriously and actively work to resolve it for you."
+        },
+        {
+          "timestamp": "10:09:26.065",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:28.816",
+          "text": "🎤 目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。"
+        },
+        {
+          "timestamp": "10:09:29.962",
+          "text": "🔊 I have prepared several solutions for you, and you can choose based on your actual needs."
+        },
+        {
+          "timestamp": "10:09:33.687",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:35.186",
+          "text": "🎤 首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。"
+        },
+        {
+          "timestamp": "10:09:36.781",
+          "text": "🔊 First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay."
+        },
+        {
+          "timestamp": "10:09:48.639",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:54.359",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:09:59.034",
+          "text": "🎤 第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。"
+        },
+        {
+          "timestamp": "10:10:04.088",
+          "text": "🔊 Second, if you are no longer satisfied with this hotel, we can also coordinate a free cancellation of your booking and recommend other hotels nearby of the same or higher grade to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee waiver or upgrading your room type so that you receive some compensation and better service."
+        },
+        {
+          "timestamp": "10:10:04.088",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:10:04.098",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:10:07.183",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:10:08.748",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:10:10.702",
+          "text": "🎤 请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进。直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:10:14.076",
+          "text": "🔊 Please take some time to consider which option best suits your needs, or if you have other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "7",
+        "Session": "95.4s",
+        "Cost": "$0.2316",
+        "Cost/sec": "$0.00243",
+        "Cost/Input": "$0.00364",
+        "Avg E2E Latency": "1.68s",
+        "P50 E2E Latency": "1.49s",
+        "P90 E2E Latency": "2.39s",
+        "Input Audio": "63.6s",
+        "Output Audio": "71.2s"
+      }
+    },
+    {
+      "config": {
+        "name": "B_semantic_silence600",
+        "description": "semantic_vad | silence=600ms | speech=80ms | prefix=300ms | threshold=0.5",
+        "turnDetectionType": "azure_semantic_vad",
+        "silenceDurationInMs": 600,
+        "speechDurationInMs": 80,
+        "prefixPaddingInMs": 300,
+        "threshold": 0.5
+      },
+      "turns": 6,
+      "avgE2eLatencyMs": 1880,
+      "p50E2eLatencyMs": 1680,
+      "p90E2eLatencyMs": 2510,
+      "totalCost": "$0.1891",
+      "costPerInputSec": "$0.00294",
+      "inputAudioSec": "64.3s",
+      "outputAudioSec": "71.0s",
+      "sessionSec": "95.6s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3498ms",
+          "e2eLatency": "1649ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004254"
+        },
+        {
+          "turn": "2",
+          "duration": "16014ms",
+          "e2eLatency": "1481ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。这样的情况确实是让人不舒服，也很影响出行的心情。但请您放心。我们一定会认真对待您的问题，积极为您解决这个问题的。",
+          "outputTranslation": "Our platform has always valued every guest's feedback highly, and I fully understand how you feel right now. This kind of situation is indeed uncomfortable and can greatly affect your travel mood. But please rest assured. We will definitely take your issue seriously and work actively to resolve it for you.",
+          "cost": "$0.043597"
+        },
+        {
+          "turn": "3",
+          "duration": "4661ms",
+          "e2eLatency": "1675ms",
+          "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+          "outputTranslation": "At present, I have prepared several solutions for you, and you can choose according to your actual needs.",
+          "cost": "$0.004270"
+        },
+        {
+          "turn": "4",
+          "duration": "5605ms",
+          "e2eLatency": "2510ms",
+          "inputASR": "首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。",
+          "outputTranslation": "First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay.",
+          "cost": "$0.013898"
+        },
+        {
+          "turn": "5",
+          "duration": "23233ms",
+          "e2eLatency": "2265ms",
+          "inputASR": "第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。",
+          "outputTranslation": "Second, if you are no longer satisfied with this hotel, we can also help you cancel the order for free and recommend other hotels nearby of the same or higher standard, ensuring your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee reduction or upgrading your room, so that you can receive some compensation and better service.",
+          "cost": "$0.076598"
+        },
+        {
+          "turn": "6",
+          "duration": "11303ms",
+          "e2eLatency": "1701ms",
+          "inputASR": "请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+          "outputTranslation": "Please take a moment to consider which option best suits your needs, or if you have any other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved.",
+          "cost": "$0.046492"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:10:50.433",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:10:52.658",
+          "text": "🔊 We are very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:10:57.028",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:01.474",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:02.771",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:07.061",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。这样的情况确实是让人不舒服，也很影响出行的心情。但请您放心。我们一定会认真对待您的问题，积极为您解决这个问题的。"
+        },
+        {
+          "timestamp": "10:11:12.260",
+          "text": "🔊 Our platform has always valued every guest's feedback highly, and I fully understand how you feel right now. This kind of situation is indeed uncomfortable and can greatly affect your travel mood. But please rest assured. We will definitely take your issue seriously and work actively to resolve it for you."
+        },
+        {
+          "timestamp": "10:11:12.261",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:12.475",
+          "text": "🎤 目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。"
+        },
+        {
+          "timestamp": "10:11:14.023",
+          "text": "🔊 At present, I have prepared several solutions for you, and you can choose according to your actual needs."
+        },
+        {
+          "timestamp": "10:11:18.801",
+          "text": "🎤 首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。"
+        },
+        {
+          "timestamp": "10:11:21.075",
+          "text": "🔊 First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay."
+        },
+        {
+          "timestamp": "10:11:32.407",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:38.125",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:42.673",
+          "text": "🎤 第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。"
+        },
+        {
+          "timestamp": "10:11:47.617",
+          "text": "🔊 Second, if you are no longer satisfied with this hotel, we can also help you cancel the order for free and recommend other hotels nearby of the same or higher standard, ensuring your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee reduction or upgrading your room, so that you can receive some compensation and better service."
+        },
+        {
+          "timestamp": "10:11:47.618",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:51.151",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:11:54.858",
+          "text": "🎤 请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:11:58.115",
+          "text": "🔊 Please take a moment to consider which option best suits your needs, or if you have any other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "6",
+        "Session": "95.6s",
+        "Cost": "$0.1891",
+        "Cost/sec": "$0.00198",
+        "Cost/Input": "$0.00294",
+        "Avg E2E Latency": "1.88s",
+        "P50 E2E Latency": "1.68s",
+        "P90 E2E Latency": "2.51s",
+        "Input Audio": "64.3s",
+        "Output Audio": "71.0s"
+      }
+    },
+    {
+      "config": {
+        "name": "C_semantic_silence800_speech200",
+        "description": "semantic_vad | silence=800ms | speech=200ms | prefix=300ms | threshold=0.5",
+        "turnDetectionType": "azure_semantic_vad",
+        "silenceDurationInMs": 800,
+        "speechDurationInMs": 200,
+        "prefixPaddingInMs": 300,
+        "threshold": 0.5
+      },
+      "turns": 2,
+      "avgE2eLatencyMs": 1620,
+      "p50E2eLatencyMs": 1500,
+      "p90E2eLatencyMs": 1730,
+      "totalCost": "$0.1336",
+      "costPerInputSec": "$0.00197",
+      "inputAudioSec": "67.7s",
+      "outputAudioSec": "70.5s",
+      "sessionSec": "95.6s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3853ms",
+          "e2eLatency": "1505ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "I am very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004203"
+        },
+        {
+          "turn": "2",
+          "duration": "63857ms",
+          "e2eLatency": "1730ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。这样的情况确实是让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面。面提出补偿要求，比如申请房费减免或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者是如果您有其他想法也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+          "outputTranslation": "Our platform has always attached great importance to the feedback of every guest, and I fully understand how you feel right now.  \nSuch a situation is indeed unpleasant and can affect your travel mood.  \nBut please rest assured, we will take your issue seriously and work actively to resolve it for you.  \nCurrently, I have prepared several solutions for you to choose from based on your actual needs.  \nFirst, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay.  \nSecond, if you are no longer satisfied with this hotel, we can also coordinate to help you cancel the booking for free and recommend other nearby hotels of the same or higher standard, ensuring your trip is not affected.  \nThird, we will proactively request compensation from the hotel, such as applying for a room rate reduction or upgrading your room type, so you can receive some compensation and better service.  \nPlease consider which option best meets your needs, or if you have other ideas, feel free to let us know at any time.  \nWe will continue to follow up for you until the issue is fully resolved.",
+          "cost": "$0.129367"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:12:34.031",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:12:36.151",
+          "text": "🔊 I am very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:12:40.684",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:12:45.141",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:12:51.247",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:12:56.085",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:13:02.681",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:13:28.213",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:13:34.697",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:13:38.479",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。这样的情况确实是让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面。面提出补偿要求，比如申请房费减免或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者是如果您有其他想法也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:13:53.943",
+          "text": "🔊 Our platform has always attached great importance to the feedback of every guest, and I fully understand how you feel right now.  \nSuch a situation is indeed unpleasant and can affect your travel mood.  \nBut please rest assured, we will take your issue seriously and work actively to resolve it for you.  \nCurrently, I have prepared several solutions for you to choose from based on your actual needs.  \nFirst, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay.  \nSecond, if you are no longer satisfied with this hotel, we can also coordinate to help you cancel the booking for free and recommend other nearby hotels of the same or higher standard, ensuring your trip is not affected.  \nThird, we will proactively request compensation from the hotel, such as applying for a room rate reduction or upgrading your room type, so you can receive some compensation and better service.  \nPlease consider which option best meets your needs, or if you have other ideas, feel free to let us know at any time.  \nWe will continue to follow up for you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "2",
+        "Session": "95.6s",
+        "Cost": "$0.1336",
+        "Cost/sec": "$0.00140",
+        "Cost/Input": "$0.00197",
+        "Avg E2E Latency": "1.62s",
+        "P50 E2E Latency": "1.50s",
+        "P90 E2E Latency": "1.73s",
+        "Input Audio": "67.7s",
+        "Output Audio": "70.5s"
+      }
+    },
+    {
+      "config": {
+        "name": "D_semantic_silence500_speech150",
+        "description": "semantic_vad | silence=500ms | speech=150ms | prefix=300ms | threshold=0.5",
+        "turnDetectionType": "azure_semantic_vad",
+        "silenceDurationInMs": 500,
+        "speechDurationInMs": 150,
+        "prefixPaddingInMs": 300,
+        "threshold": 0.5
+      },
+      "turns": 8,
+      "avgE2eLatencyMs": 2009.9999999999998,
+      "p50E2eLatencyMs": 1810,
+      "p90E2eLatencyMs": 2700,
+      "totalCost": "$0.1880",
+      "costPerInputSec": "$0.00295",
+      "inputAudioSec": "63.7s",
+      "outputAudioSec": "69.8s",
+      "sessionSec": "95.7s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3458ms",
+          "e2eLatency": "1529ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "I am very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004143"
+        },
+        {
+          "turn": "2",
+          "duration": "10302ms",
+          "e2eLatency": "1807ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的一些心情。",
+          "outputTranslation": "Our platform has always valued every guest's feedback, and I fully understand how you feel right now. Encountering such situations is indeed unpleasant and can greatly affect the mood of your trip.",
+          "cost": "$0.019882"
+        },
+        {
+          "turn": "3",
+          "duration": "1246ms",
+          "e2eLatency": "2699ms",
+          "inputASR": "但请您放心。",
+          "outputTranslation": "But please rest assured.",
+          "cost": "$0.000950"
+        },
+        {
+          "turn": "4",
+          "duration": "4017ms",
+          "e2eLatency": "1628ms",
+          "inputASR": "我们一定会认真对待您的问题，积极为您解决这个问题的。",
+          "outputTranslation": "We will definitely take your issue seriously and actively work to resolve it for you.",
+          "cost": "$0.009127"
+        },
+        {
+          "turn": "5",
+          "duration": "4604ms",
+          "e2eLatency": "1586ms",
+          "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+          "outputTranslation": "I have prepared several solutions for you, and you can choose according to your actual needs.",
+          "cost": "$0.017355"
+        },
+        {
+          "turn": "6",
+          "duration": "5759ms",
+          "e2eLatency": "1885ms",
+          "inputASR": "首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。",
+          "outputTranslation": "First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay.",
+          "cost": "$0.013786"
+        },
+        {
+          "turn": "7",
+          "duration": "23356ms",
+          "e2eLatency": "2378ms",
+          "inputASR": "第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。",
+          "outputTranslation": "Second, if you are no longer satisfied with this hotel, we can also assist you with a free cancellation and recommend other hotels nearby of the same or higher standard to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room charge reduction or upgrading your room type, so you can receive some compensation and better service.",
+          "cost": "$0.076870"
+        },
+        {
+          "turn": "8",
+          "duration": "10915ms",
+          "e2eLatency": "2574ms",
+          "inputASR": "请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+          "outputTranslation": "Please take some time to consider which option better suits your needs, or if you have other ideas, feel free to let us know at any time. We will continue to follow up for you until the issue is fully resolved.",
+          "cost": "$0.045934"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:14:17.368",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:14:19.181",
+          "text": "🔊 I am very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:14:23.952",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:14:28.445",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的一些心情。"
+        },
+        {
+          "timestamp": "10:14:31.691",
+          "text": "🔊 Our platform has always valued every guest's feedback, and I fully understand how you feel right now. Encountering such situations is indeed unpleasant and can greatly affect the mood of your trip."
+        },
+        {
+          "timestamp": "10:14:31.692",
+          "text": "🎤 但请您放心。"
+        },
+        {
+          "timestamp": "10:14:32.454",
+          "text": "🔊 But please rest assured."
+        },
+        {
+          "timestamp": "10:14:34.336",
+          "text": "🎤 我们一定会认真对待您的问题，积极为您解决这个问题的。"
+        },
+        {
+          "timestamp": "10:14:35.666",
+          "text": "🔊 We will definitely take your issue seriously and actively work to resolve it for you."
+        },
+        {
+          "timestamp": "10:14:36.979",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:14:39.518",
+          "text": "🎤 目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。"
+        },
+        {
+          "timestamp": "10:14:40.810",
+          "text": "🔊 I have prepared several solutions for you, and you can choose according to your actual needs."
+        },
+        {
+          "timestamp": "10:14:46.034",
+          "text": "🎤 首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。"
+        },
+        {
+          "timestamp": "10:14:47.691",
+          "text": "🔊 First, we can immediately contact the hotel to help you change your room, ensuring you have a more comfortable stay."
+        },
+        {
+          "timestamp": "10:14:59.336",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:15:05.222",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:15:09.896",
+          "text": "🎤 第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。"
+        },
+        {
+          "timestamp": "10:15:15.007",
+          "text": "🔊 Second, if you are no longer satisfied with this hotel, we can also assist you with a free cancellation and recommend other hotels nearby of the same or higher standard to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room charge reduction or upgrading your room type, so you can receive some compensation and better service."
+        },
+        {
+          "timestamp": "10:15:15.007",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:15:18.133",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:15:21.613",
+          "text": "🎤 请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:15:25.761",
+          "text": "🔊 Please take some time to consider which option better suits your needs, or if you have other ideas, feel free to let us know at any time. We will continue to follow up for you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "8",
+        "Session": "95.7s",
+        "Cost": "$0.1880",
+        "Cost/sec": "$0.00196",
+        "Cost/Input": "$0.00295",
+        "Avg E2E Latency": "2.01s",
+        "P50 E2E Latency": "1.81s",
+        "P90 E2E Latency": "2.70s",
+        "Input Audio": "63.7s",
+        "Output Audio": "69.8s"
+      }
+    },
+    {
+      "config": {
+        "name": "E_server_vad_silence500",
+        "description": "server_vad | silence=500ms | prefix=500ms | threshold=0.5",
+        "turnDetectionType": "server_vad",
+        "silenceDurationInMs": 500,
+        "speechDurationInMs": 80,
+        "prefixPaddingInMs": 500,
+        "threshold": 0.5
+      },
+      "turns": 8,
+      "avgE2eLatencyMs": 1930,
+      "p50E2eLatencyMs": 1650,
+      "p90E2eLatencyMs": 2910,
+      "totalCost": "$0.2093",
+      "costPerInputSec": "$0.00330",
+      "inputAudioSec": "63.5s",
+      "outputAudioSec": "72.0s",
+      "sessionSec": "95.7s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3452ms",
+          "e2eLatency": "1649ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004681"
+        },
+        {
+          "turn": "2",
+          "duration": "10282ms",
+          "e2eLatency": "1627ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。",
+          "outputTranslation": "Our platform has always valued the feedback of every guest, and I now fully understand how you feel. Encountering such a situation is indeed unpleasant and greatly affects the mood of your trip.",
+          "cost": "$0.020553"
+        },
+        {
+          "turn": "3",
+          "duration": "1010ms",
+          "e2eLatency": "2909ms",
+          "inputASR": "但请您放心。",
+          "outputTranslation": "But please rest assured.",
+          "cost": "$0.000983"
+        },
+        {
+          "turn": "4",
+          "duration": "4091ms",
+          "e2eLatency": "1467ms",
+          "inputASR": "我们一定会认真对待您的问题，积极为您解决这个问题的。",
+          "outputTranslation": "We will definitely take your issue seriously and actively work to resolve it for you.",
+          "cost": "$0.009352"
+        },
+        {
+          "turn": "5",
+          "duration": "4598ms",
+          "e2eLatency": "1504ms",
+          "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+          "outputTranslation": "Currently, I have prepared several solutions for you, and you can choose according to your actual needs.",
+          "cost": "$0.018130"
+        },
+        {
+          "turn": "6",
+          "duration": "5754ms",
+          "e2eLatency": "1784ms",
+          "inputASR": "首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。",
+          "outputTranslation": "First, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay.",
+          "cost": "$0.013953"
+        },
+        {
+          "turn": "7",
+          "duration": "23358ms",
+          "e2eLatency": "2533ms",
+          "inputASR": "第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。",
+          "outputTranslation": "Second, if you are no longer satisfied with this hotel, we can also coordinate a free cancellation of your booking and recommend other nearby hotels of the same or higher grade to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee discount or upgrading your room type, so that you can receive some compensation and better service.",
+          "cost": "$0.094883"
+        },
+        {
+          "turn": "8",
+          "duration": "10911ms",
+          "e2eLatency": "1975ms",
+          "inputASR": "请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+          "outputTranslation": "Please take some time to consider which solution best meets your needs, or if you have any other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved.",
+          "cost": "$0.046746"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:15:58.481",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:00.820",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:16:02.924",
+          "text": "🔊 We are very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:16:07.547",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:11.989",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。"
+        },
+        {
+          "timestamp": "10:16:15.364",
+          "text": "🔊 Our platform has always valued the feedback of every guest, and I now fully understand how you feel. Encountering such a situation is indeed unpleasant and greatly affects the mood of your trip."
+        },
+        {
+          "timestamp": "10:16:15.364",
+          "text": "🎤 但请您放心。"
+        },
+        {
+          "timestamp": "10:16:16.048",
+          "text": "🔊 But please rest assured."
+        },
+        {
+          "timestamp": "10:16:17.875",
+          "text": "🎤 我们一定会认真对待您的问题，积极为您解决这个问题的。"
+        },
+        {
+          "timestamp": "10:16:19.057",
+          "text": "🔊 We will definitely take your issue seriously and actively work to resolve it for you."
+        },
+        {
+          "timestamp": "10:16:20.551",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:23.102",
+          "text": "🎤 目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。"
+        },
+        {
+          "timestamp": "10:16:24.334",
+          "text": "🔊 Currently, I have prepared several solutions for you, and you can choose according to your actual needs."
+        },
+        {
+          "timestamp": "10:16:29.619",
+          "text": "🎤 首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。"
+        },
+        {
+          "timestamp": "10:16:31.166",
+          "text": "🔊 First, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay."
+        },
+        {
+          "timestamp": "10:16:42.955",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:48.797",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:53.468",
+          "text": "🎤 第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免。或者升级您的房型，让您能获得一定的补偿和更好的服务。"
+        },
+        {
+          "timestamp": "10:16:58.640",
+          "text": "🔊 Second, if you are no longer satisfied with this hotel, we can also coordinate a free cancellation of your booking and recommend other nearby hotels of the same or higher grade to ensure your trip is not affected. Third, we will proactively request compensation from the hotel, such as applying for a room fee discount or upgrading your room type, so that you can receive some compensation and better service."
+        },
+        {
+          "timestamp": "10:16:58.646",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:16:58.650",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:17:01.563",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:17:05.160",
+          "text": "🎤 请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:17:08.528",
+          "text": "🔊 Please take some time to consider which solution best meets your needs, or if you have any other ideas, feel free to let us know at any time. We will continue to follow up with you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "8",
+        "Session": "95.7s",
+        "Cost": "$0.2093",
+        "Cost/sec": "$0.00219",
+        "Cost/Input": "$0.00330",
+        "Avg E2E Latency": "1.93s",
+        "P50 E2E Latency": "1.65s",
+        "P90 E2E Latency": "2.91s",
+        "Input Audio": "63.5s",
+        "Output Audio": "72.0s"
+      }
+    },
+    {
+      "config": {
+        "name": "F_server_vad_silence800",
+        "description": "server_vad | silence=800ms | prefix=500ms | threshold=0.5",
+        "turnDetectionType": "server_vad",
+        "silenceDurationInMs": 800,
+        "speechDurationInMs": 80,
+        "prefixPaddingInMs": 500,
+        "threshold": 0.5
+      },
+      "turns": 3,
+      "avgE2eLatencyMs": 1810,
+      "p50E2eLatencyMs": 1980,
+      "p90E2eLatencyMs": 2100,
+      "totalCost": "$0.1474",
+      "costPerInputSec": "$0.00223",
+      "inputAudioSec": "66.2s",
+      "outputAudioSec": "69.8s",
+      "sessionSec": "95.8s",
+      "perTurnData": [
+        {
+          "turn": "1",
+          "duration": "3657ms",
+          "e2eLatency": "1353ms",
+          "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+          "outputTranslation": "I am very sorry that the hotel you stayed at did not meet your expectations.",
+          "cost": "$0.004203"
+        },
+        {
+          "turn": "2",
+          "duration": "27848ms",
+          "e2eLatency": "1981ms",
+          "inputASR": "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。",
+          "outputTranslation": "Our platform has always attached great importance to the feedback of every guest, and I fully understand how you feel right now.  \nEncountering such a situation is indeed unpleasant and can affect your mood during your trip.  \nBut please rest assured, we will take your issue seriously and actively work to resolve it for you.  \nCurrently, I have prepared several solutions for you to choose from based on your actual needs.  \nFirst, we can immediately contact the hotel to help you change your room and ensure you have a more comfortable stay.",
+          "cost": "$0.052098"
+        },
+        {
+          "turn": "3",
+          "duration": "34698ms",
+          "e2eLatency": "2095ms",
+          "inputASR": "如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+          "outputTranslation": "If you are no longer satisfied with this hotel, we can also arrange to cancel your booking for free and recommend other hotels nearby of the same or higher standard to ensure your trip is not affected.  \nThird, we will proactively request compensation from the hotel, such as applying for a room fee waiver or upgrading your room type, so you can receive some compensation and better service.  \nPlease consider which option best meets your needs, or if you have other ideas, feel free to let us know at any time.  \nWe will continue to follow up for you until the issue is fully resolved.",
+          "cost": "$0.091089"
+        }
+      ],
+      "conversationLogs": [
+        {
+          "timestamp": "10:17:44.740",
+          "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+        },
+        {
+          "timestamp": "10:17:46.522",
+          "text": "🔊 I am very sorry that the hotel you stayed at did not meet your expectations."
+        },
+        {
+          "timestamp": "10:17:51.298",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:17:55.880",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:01.759",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:07.119",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:13.430",
+          "text": "🎤 我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情。遇到这样的情况，确实是让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更舒适的入住环境。"
+        },
+        {
+          "timestamp": "10:18:22.187",
+          "text": "🔊 Our platform has always attached great importance to the feedback of every guest, and I fully understand how you feel right now.  \nEncountering such a situation is indeed unpleasant and can affect your mood during your trip.  \nBut please rest assured, we will take your issue seriously and actively work to resolve it for you.  \nCurrently, I have prepared several solutions for you to choose from based on your actual needs.  \nFirst, we can immediately contact the hotel to help you change your room and ensure you have a more comfortable stay."
+        },
+        {
+          "timestamp": "10:18:26.817",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:37.870",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:45.894",
+          "text": "🎤"
+        },
+        {
+          "timestamp": "10:18:49.138",
+          "text": "🎤 如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。第三，我们会主动向酒店方面提出补偿要求，比如申请房费减免或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+        },
+        {
+          "timestamp": "10:18:57.342",
+          "text": "🔊 If you are no longer satisfied with this hotel, we can also arrange to cancel your booking for free and recommend other hotels nearby of the same or higher standard to ensure your trip is not affected.  \nThird, we will proactively request compensation from the hotel, such as applying for a room fee waiver or upgrading your room type, so you can receive some compensation and better service.  \nPlease consider which option best meets your needs, or if you have other ideas, feel free to let us know at any time.  \nWe will continue to follow up for you until the issue is fully resolved."
+        }
+      ],
+      "allStats": {
+        "Turns": "3",
+        "Session": "95.8s",
+        "Cost": "$0.1474",
+        "Cost/sec": "$0.00154",
+        "Cost/Input": "$0.00223",
+        "Avg E2E Latency": "1.81s",
+        "P50 E2E Latency": "1.98s",
+        "P90 E2E Latency": "2.10s",
+        "Input Audio": "66.2s",
+        "Output Audio": "69.8s"
+      }
+    }
+  ],
+  "referenceText": "非常抱歉您入住的酒店没有达到您的预期。我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情，遇到这样的情况确实让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择：首先我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境；第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响；第三我们会主动向酒店方面提出补偿要求，比如申请房费减免，或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+  "referenceSentences": [
+    "非常抱歉您入住的酒店没有达到您的预期。",
+    "我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情，",
+    "遇到这样的情况确实让人不舒服，也很影响出行的心情。",
+    "但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。",
+    "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择：",
+    "首先我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境；",
+    "第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响；",
+    "第三我们会主动向酒店方面提出补偿要求，比如申请房费减免，或者升级您的房型，让您能获得一定的补偿和更好的服务。",
+    "请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。",
+    "我们会一直为您跟进，直到问题圆满解决。"
+  ]
+}

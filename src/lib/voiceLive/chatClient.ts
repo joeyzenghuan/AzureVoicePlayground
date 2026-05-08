@@ -246,10 +246,10 @@ export class VoiceLiveChatClient {
     let voiceConfig: string | { type: string; name: string; model?: string };
 
     if (config.voiceType === 'personal') {
-      // Personal voice uses azure-personal type with speaker profile ID
+      // Voice Live expects the personal voice resource name here, not the speaker profile ID.
       voiceConfig = {
         type: 'azure-personal',
-        name: config.personalVoiceSpeakerProfileId,
+        name: config.personalVoiceName,
         model: config.personalVoiceModel,
       };
     } else {

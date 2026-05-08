@@ -72,7 +72,22 @@ export function VoiceLiveChatPlayground({ endpoint, apiKey }: VoiceLiveChatPlayg
     if (!raw) return { ...DEFAULT_CHAT_CONFIG };
     try {
       const parsed = JSON.parse(raw) as Partial<VoiceLiveChatConfig>;
-      return { ...DEFAULT_CHAT_CONFIG, ...parsed };
+      const legacyPersonalVoiceField =
+        typeof parsed.personalVoiceSpeakerProfileId === 'string'
+          ? parsed.personalVoiceSpeakerProfileId.trim()
+          : '';
+      const looksLikeSpeakerProfileId =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          legacyPersonalVoiceField
+        );
+
+      return {
+        ...DEFAULT_CHAT_CONFIG,
+        ...parsed,
+        personalVoiceName:
+          parsed.personalVoiceName?.trim() ||
+          (legacyPersonalVoiceField && !looksLikeSpeakerProfileId ? legacyPersonalVoiceField : ''),
+      };
     } catch {
       return { ...DEFAULT_CHAT_CONFIG };
     }
@@ -261,8 +276,8 @@ export function VoiceLiveChatPlayground({ endpoint, apiKey }: VoiceLiveChatPlayg
     if (isConnected) return;
 
     // Validate personal voice settings
-    if (config.voiceType === 'personal' && !config.personalVoiceSpeakerProfileId.trim()) {
-      setStatusText('Error: Speaker Profile ID is required for Personal Voice');
+    if (config.voiceType === 'personal' && !config.personalVoiceName.trim()) {
+      setStatusText('Error: Personal Voice Name is required for Personal Voice');
       return;
     }
 
@@ -677,15 +692,20 @@ export function VoiceLiveChatPlayground({ endpoint, apiKey }: VoiceLiveChatPlayg
             /* Personal Voice Settings */
             <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Speaker Profile ID</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Personal Voice Name</label>
                 <input
                   type="text"
-                  value={config.personalVoiceSpeakerProfileId}
-                  onChange={(e) => setConfig((c) => ({ ...c, personalVoiceSpeakerProfileId: e.target.value }))}
+                  value={config.personalVoiceName}
+                  onChange={(e) => setConfig((c) => ({ ...c, personalVoiceName: e.target.value }))}
                   disabled={isConnected}
-                  placeholder="Enter speaker profile ID"
+                  placeholder="Enter personal voice name"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                 />
+                {config.personalVoiceSpeakerProfileId && (
+                  <p className="mt-1 text-[11px] text-gray-500 break-all">
+                    Speaker Profile ID: {config.personalVoiceSpeakerProfileId}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Model</label>
@@ -786,14 +806,19 @@ export function VoiceLiveChatPlayground({ endpoint, apiKey }: VoiceLiveChatPlayg
                       key={pv.id}
                       type="button"
                       onClick={() => {
-                        setConfig((c) => ({ ...c, personalVoiceSpeakerProfileId: pv.speakerProfileId }));
+                        setConfig((c) => ({
+                          ...c,
+                          personalVoiceName: pv.id,
+                          personalVoiceSpeakerProfileId: pv.speakerProfileId,
+                        }));
                         setPersonalVoices([]);
                       }}
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors ${
-                        config.personalVoiceSpeakerProfileId === pv.speakerProfileId ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                        config.personalVoiceName === pv.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                       }`}
                     >
                       <div className="font-medium">{pv.displayName || pv.id}</div>
+                      <div className="text-xs text-gray-500 truncate">Name: {pv.id}</div>
                       <div className="text-xs text-gray-500 truncate">{pv.speakerProfileId}</div>
                     </button>
                   ))}

@@ -22,6 +22,7 @@ export interface VoiceLiveChatConfig {
   instructions: string;
   voice: string;
   voiceType: VoiceType;
+  personalVoiceName: string;
   personalVoiceSpeakerProfileId: string;
   personalVoiceModel: string;
   recognitionLanguage: string;
@@ -60,6 +61,7 @@ export const DEFAULT_CHAT_CONFIG: VoiceLiveChatConfig = {
   instructions: 'You are a helpful and friendly AI assistant. Be concise and natural in your responses.\n\nPlease only respond in English.\n\nBefore calling weather, say something to acknowledge in A FEW words.',
   voice: 'en-us-ava:DragonHDLatestNeural',
   voiceType: 'standard',
+  personalVoiceName: '',
   personalVoiceSpeakerProfileId: '',
   personalVoiceModel: 'DragonLatestNeural',
   recognitionLanguage: 'auto',

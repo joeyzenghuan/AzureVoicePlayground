@@ -1,0 +1,2137 @@
+{
+  "config": {
+    "model": "gpt-4.1-mini",
+    "targetLanguage": "en",
+    "prompt": "You are a simultaneous interpreter.\nTarget language: en.\n\nRules:\n1) Translate sentence by sentence (output each sentence as it completes).\n2) Keep context consistent across turns (pronouns, terms, tone, references).\n3) Preserve meaning faithfully; do not add explanations or extra content.\n4) Keep proper nouns, numbers, and code as-is unless a standard translation is obvious.\n5) Output translation text only.",
+    "asrModel": "azure-speech",
+    "asrLanguages": "zh,en",
+    "turnDetectionType": "azure_semantic_vad",
+    "threshold": 0.5,
+    "prefixPaddingInMs": 300,
+    "silenceDurationInMs": 200,
+    "speechDurationInMs": 80,
+    "removeFillerWords": false,
+    "voiceProvider": "azure-standard",
+    "voiceName": "en-US-AndrewMultilingualNeural",
+    "inputAudioFormat": "pcm16",
+    "inputAudioSamplingRate": 16000,
+    "outputAudioFormat": "pcm16",
+    "interruptResponse": false
+  },
+  "metrics": {
+    "stats": {
+      "Turns": "67",
+      "Session": "95.8s",
+      "Cost": "$1.7021",
+      "Cost/sec": "$0.01776",
+      "Cost/Input": "$0.03230",
+      "Avg E2E Latency": "1.01s",
+      "P50 E2E Latency": "922ms",
+      "P90 E2E Latency": "1.60s",
+      "Input Audio": "52.7s",
+      "Output Audio": "123.0s"
+    },
+    "turns": [
+      {
+        "turn": "1",
+        "duration": "3431ms",
+        "e2eLatency": "1496ms",
+        "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+        "outputTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations.",
+        "inputTextTokens": "0",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "268",
+        "cachedAudioTokens": "189",
+        "outputTextTokens": "17",
+        "outputAudioTokens": "91",
+        "totalTokens": "376",
+        "cost": "$0.007130"
+      },
+      {
+        "turn": "2",
+        "duration": "286ms",
+        "e2eLatency": "1048ms",
+        "inputASR": "我们平台。",
+        "outputTranslation": "Our platform.",
+        "inputTextTokens": "16",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "189",
+        "cachedAudioTokens": "170",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "22",
+        "totalTokens": "231",
+        "cost": "$0.003638"
+      },
+      {
+        "turn": "3",
+        "duration": "850ms",
+        "e2eLatency": "386ms",
+        "inputASR": "还一直非常。",
+        "outputTranslation": "It has always been very.",
+        "inputTextTokens": "19",
+        "cachedTextTokens": "16",
+        "inputAudioTokens": "217",
+        "cachedAudioTokens": "203",
+        "outputTextTokens": "7",
+        "outputAudioTokens": "32",
+        "totalTokens": "275",
+        "cost": "$0.004414"
+      },
+      {
+        "turn": "4",
+        "duration": "192ms",
+        "e2eLatency": "895ms",
+        "inputASR": "非常重视美。",
+        "outputTranslation": "We attach great importance to beauty.",
+        "inputTextTokens": "25",
+        "cachedTextTokens": "19",
+        "inputAudioTokens": "255",
+        "cachedAudioTokens": "236",
+        "outputTextTokens": "8",
+        "outputAudioTokens": "49",
+        "totalTokens": "337",
+        "cost": "$0.005564"
+      },
+      {
+        "turn": "5",
+        "duration": "562ms",
+        "e2eLatency": "746ms",
+        "inputASR": "一位客人。",
+        "outputTranslation": "A guest.",
+        "inputTextTokens": "32",
+        "cachedTextTokens": "25",
+        "inputAudioTokens": "281",
+        "cachedAudioTokens": "268",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "20",
+        "totalTokens": "337",
+        "cost": "$0.005003"
+      },
+      {
+        "turn": "6",
+        "duration": "293ms",
+        "e2eLatency": "810ms",
+        "inputASR": "The.",
+        "outputTranslation": "Very tired.",
+        "inputTextTokens": "35",
+        "cachedTextTokens": "32",
+        "inputAudioTokens": "468",
+        "cachedAudioTokens": "449",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "22",
+        "totalTokens": "529",
+        "cost": "$0.007938"
+      },
+      {
+        "turn": "7",
+        "duration": "582ms",
+        "e2eLatency": "548ms",
+        "inputASR": "很困。",
+        "outputTranslation": "Yes.",
+        "inputTextTokens": "38",
+        "cachedTextTokens": "35",
+        "inputAudioTokens": "347",
+        "cachedAudioTokens": "333",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "17",
+        "totalTokens": "405",
+        "cost": "$0.005920"
+      },
+      {
+        "turn": "8",
+        "duration": "300ms",
+        "e2eLatency": "541ms",
+        "inputASR": "对。",
+        "outputTranslation": "I.",
+        "inputTextTokens": "40",
+        "cachedTextTokens": "38",
+        "inputAudioTokens": "189",
+        "cachedAudioTokens": "177",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "13",
+        "totalTokens": "245",
+        "cost": "$0.003369"
+      },
+      {
+        "turn": "9",
+        "duration": "304ms",
+        "e2eLatency": "501ms",
+        "inputASR": "我。",
+        "outputTranslation": "I am now.",
+        "inputTextTokens": "42",
+        "cachedTextTokens": "40",
+        "inputAudioTokens": "196",
+        "cachedAudioTokens": "189",
+        "outputTextTokens": "5",
+        "outputAudioTokens": "17",
+        "totalTokens": "260",
+        "cost": "$0.003617"
+      },
+      {
+        "turn": "10",
+        "duration": "18ms",
+        "e2eLatency": "1171ms",
+        "inputASR": "我现在。",
+        "outputTranslation": "Also here.",
+        "inputTextTokens": "46",
+        "cachedTextTokens": "42",
+        "inputAudioTokens": "414",
+        "cachedAudioTokens": "399",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "21",
+        "totalTokens": "485",
+        "cost": "$0.007089"
+      },
+      {
+        "turn": "11",
+        "duration": "496ms",
+        "e2eLatency": "2582ms",
+        "inputASR": "在也是。",
+        "outputTranslation": "Very.",
+        "inputTextTokens": "49",
+        "cachedTextTokens": "46",
+        "inputAudioTokens": "1165",
+        "cachedAudioTokens": "1122",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "1233",
+        "cost": "$0.018429"
+      },
+      {
+        "turn": "12",
+        "duration": "1582ms",
+        "e2eLatency": "1025ms",
+        "inputASR": "非常。",
+        "outputTranslation": "Understand.",
+        "inputTextTokens": "51",
+        "cachedTextTokens": "49",
+        "inputAudioTokens": "540",
+        "cachedAudioTokens": "519",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "20",
+        "totalTokens": "614",
+        "cost": "$0.008989"
+      },
+      {
+        "turn": "13",
+        "duration": "752ms",
+        "e2eLatency": "498ms",
+        "inputASR": "理解。",
+        "outputTranslation": "Please now.",
+        "inputTextTokens": "53",
+        "cachedTextTokens": "51",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "19",
+        "totalTokens": "76",
+        "cost": "$0.000689"
+      },
+      {
+        "turn": "14",
+        "duration": "752ms",
+        "e2eLatency": "1033ms",
+        "inputASR": "请您现在。",
+        "outputTranslation": "Of the heart.",
+        "inputTextTokens": "56",
+        "cachedTextTokens": "53",
+        "inputAudioTokens": "287",
+        "cachedAudioTokens": "275",
+        "outputTextTokens": "5",
+        "outputAudioTokens": "19",
+        "totalTokens": "367",
+        "cost": "$0.005090"
+      },
+      {
+        "turn": "15",
+        "duration": "276ms",
+        "e2eLatency": "985ms",
+        "inputASR": "的心。",
+        "outputTranslation": "Apply.",
+        "inputTextTokens": "60",
+        "cachedTextTokens": "56",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "79",
+        "cost": "$0.000594"
+      },
+      {
+        "turn": "16",
+        "duration": "276ms",
+        "e2eLatency": "1597ms",
+        "inputASR": "申请。",
+        "outputTranslation": "Mm.",
+        "inputTextTokens": "62",
+        "cachedTextTokens": "60",
+        "inputAudioTokens": "612",
+        "cachedAudioTokens": "590",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "15",
+        "totalTokens": "692",
+        "cost": "$0.009938"
+      },
+      {
+        "turn": "17",
+        "duration": "1304ms",
+        "e2eLatency": "1114ms",
+        "inputASR": "嗯。",
+        "outputTranslation": "Encounter.",
+        "inputTextTokens": "64",
+        "cachedTextTokens": "62",
+        "inputAudioTokens": "644",
+        "cachedAudioTokens": "625",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "20",
+        "totalTokens": "731",
+        "cost": "$0.010597"
+      },
+      {
+        "turn": "18",
+        "duration": "587ms",
+        "e2eLatency": "907ms",
+        "inputASR": "遇到。",
+        "outputTranslation": "Such.",
+        "inputTextTokens": "66",
+        "cachedTextTokens": "64",
+        "inputAudioTokens": "677",
+        "cachedAudioTokens": "663",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "762",
+        "cost": "$0.010974"
+      },
+      {
+        "turn": "19",
+        "duration": "271ms",
+        "e2eLatency": "742ms",
+        "inputASR": "这样的。",
+        "outputTranslation": "The situation indeed.",
+        "inputTextTokens": "68",
+        "cachedTextTokens": "66",
+        "inputAudioTokens": "715",
+        "cachedAudioTokens": "696",
+        "outputTextTokens": "5",
+        "outputAudioTokens": "31",
+        "totalTokens": "819",
+        "cost": "$0.012058"
+      },
+      {
+        "turn": "20",
+        "duration": "625ms",
+        "e2eLatency": "562ms",
+        "inputASR": "的情。",
+        "outputTranslation": "Is unpleasant and also very.",
+        "inputTextTokens": "72",
+        "cachedTextTokens": "68",
+        "inputAudioTokens": "368",
+        "cachedAudioTokens": "361",
+        "outputTextTokens": "7",
+        "outputAudioTokens": "49",
+        "totalTokens": "496",
+        "cost": "$0.007345"
+      },
+      {
+        "turn": "21",
+        "duration": "11ms",
+        "e2eLatency": "1011ms",
+        "inputASR": "情况确实。",
+        "outputTranslation": "Affect your mood for traveling.",
+        "inputTextTokens": "78",
+        "cachedTextTokens": "72",
+        "inputAudioTokens": "381",
+        "cachedAudioTokens": "368",
+        "outputTextTokens": "8",
+        "outputAudioTokens": "40",
+        "totalTokens": "507",
+        "cost": "$0.007253"
+      },
+      {
+        "turn": "22",
+        "duration": "494ms",
+        "e2eLatency": "911ms",
+        "inputASR": "是让人不。",
+        "outputTranslation": "But please.",
+        "inputTextTokens": "85",
+        "cachedTextTokens": "78",
+        "inputAudioTokens": "389",
+        "cachedAudioTokens": "381",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "23",
+        "totalTokens": "501",
+        "cost": "$0.006812"
+      },
+      {
+        "turn": "23",
+        "duration": "174ms",
+        "e2eLatency": "967ms",
+        "inputASR": "舒服，也很。",
+        "outputTranslation": "Please rest assured.",
+        "inputTextTokens": "88",
+        "cachedTextTokens": "85",
+        "inputAudioTokens": "805",
+        "cachedAudioTokens": "788",
+        "outputTextTokens": "5",
+        "outputAudioTokens": "25",
+        "totalTokens": "923",
+        "cost": "$0.013259"
+      },
+      {
+        "turn": "24",
+        "duration": "522ms",
+        "e2eLatency": "852ms",
+        "inputASR": "影响出。",
+        "outputTranslation": "Definitely will.",
+        "inputTextTokens": "92",
+        "cachedTextTokens": "88",
+        "inputAudioTokens": "413",
+        "cachedAudioTokens": "406",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "24",
+        "totalTokens": "533",
+        "cost": "$0.007221"
+      },
+      {
+        "turn": "25",
+        "duration": "257ms",
+        "e2eLatency": "1075ms",
+        "inputASR": "出行的心情。",
+        "outputTranslation": "Take seriously.",
+        "inputTextTokens": "95",
+        "cachedTextTokens": "92",
+        "inputAudioTokens": "420",
+        "cachedAudioTokens": "413",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "23",
+        "totalTokens": "542",
+        "cost": "$0.007299"
+      },
+      {
+        "turn": "26",
+        "duration": "203ms",
+        "e2eLatency": "635ms",
+        "inputASR": "但请。",
+        "outputTranslation": "The issue you have.",
+        "inputTextTokens": "98",
+        "cachedTextTokens": "95",
+        "inputAudioTokens": "432",
+        "cachedAudioTokens": "420",
+        "outputTextTokens": "6",
+        "outputAudioTokens": "30",
+        "totalTokens": "566",
+        "cost": "$0.007720"
+      },
+      {
+        "turn": "27",
+        "duration": "341ms",
+        "e2eLatency": "821ms",
+        "inputASR": "请您放。",
+        "outputTranslation": "Actively work for you.",
+        "inputTextTokens": "103",
+        "cachedTextTokens": "98",
+        "inputAudioTokens": "890",
+        "cachedAudioTokens": "871",
+        "outputTextTokens": "7",
+        "outputAudioTokens": "27",
+        "totalTokens": "1027",
+        "cost": "$0.014647"
+      },
+      {
+        "turn": "28",
+        "duration": "556ms",
+        "e2eLatency": "712ms",
+        "inputASR": "放心。",
+        "outputTranslation": "Solve this.",
+        "inputTextTokens": "109",
+        "cachedTextTokens": "103",
+        "inputAudioTokens": "463",
+        "cachedAudioTokens": "451",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "21",
+        "totalTokens": "597",
+        "cost": "$0.007903"
+      },
+      {
+        "turn": "29",
+        "duration": "227ms",
+        "e2eLatency": "724ms",
+        "inputASR": "For me.",
+        "outputTranslation": "Problem.",
+        "inputTextTokens": "112",
+        "cachedTextTokens": "109",
+        "inputAudioTokens": "942",
+        "cachedAudioTokens": "931",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "15",
+        "totalTokens": "1072",
+        "cost": "$0.015050"
+      },
+      {
+        "turn": "30",
+        "duration": "359ms",
+        "e2eLatency": "570ms",
+        "inputASR": "一定会。",
+        "outputTranslation": "Mention.",
+        "inputTextTokens": "114",
+        "cachedTextTokens": "112",
+        "inputAudioTokens": "486",
+        "cachedAudioTokens": "474",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "15",
+        "totalTokens": "618",
+        "cost": "$0.008062"
+      },
+      {
+        "turn": "31",
+        "duration": "20ms",
+        "e2eLatency": "2199ms",
+        "inputASR": "会认真。",
+        "outputTranslation": "Mention.",
+        "inputTextTokens": "116",
+        "cachedTextTokens": "114",
+        "inputAudioTokens": "1530",
+        "cachedAudioTokens": "1494",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "15",
+        "totalTokens": "1664",
+        "cost": "$0.024060"
+      },
+      {
+        "turn": "32",
+        "duration": "1203ms",
+        "e2eLatency": "1858ms",
+        "inputASR": "对的。",
+        "outputTranslation": "Currently, I have prepared several solutions for you, and you can choose according to your actual needs.",
+        "inputTextTokens": "118",
+        "cachedTextTokens": "116",
+        "inputAudioTokens": "2185",
+        "cachedAudioTokens": "2149",
+        "outputTextTokens": "21",
+        "outputAudioTokens": "118",
+        "totalTokens": "2442",
+        "cost": "$0.037550"
+      },
+      {
+        "turn": "33",
+        "duration": "1476ms",
+        "e2eLatency": "869ms",
+        "inputASR": "在您的。",
+        "outputTranslation": "Currently, I have prepared several solutions for you. You can choose based on your actual needs.",
+        "inputTextTokens": "138",
+        "cachedTextTokens": "118",
+        "inputAudioTokens": "1741",
+        "cachedAudioTokens": "1710",
+        "outputTextTokens": "20",
+        "outputAudioTokens": "110",
+        "totalTokens": "2009",
+        "cost": "$0.030492"
+      },
+      {
+        "turn": "34",
+        "duration": "1143ms",
+        "e2eLatency": "1340ms",
+        "inputASR": "的问题。",
+        "outputTranslation": "Currently, I have prepared several solutions for you. You can choose according to your actual needs.",
+        "inputTextTokens": "157",
+        "cachedTextTokens": "138",
+        "inputAudioTokens": "1805",
+        "cachedAudioTokens": "1786",
+        "outputTextTokens": "20",
+        "outputAudioTokens": "109",
+        "totalTokens": "2091",
+        "cost": "$0.031463"
+      },
+      {
+        "turn": "35",
+        "duration": "996ms",
+        "e2eLatency": "1599ms",
+        "inputASR": "积极为您。",
+        "outputTranslation": "Currently, I have prepared several solutions for you, and you can choose according to your actual needs.",
+        "inputTextTokens": "176",
+        "cachedTextTokens": "157",
+        "inputAudioTokens": "2525",
+        "cachedAudioTokens": "2488",
+        "outputTextTokens": "21",
+        "outputAudioTokens": "120",
+        "totalTokens": "2842",
+        "cost": "$0.042879"
+      },
+      {
+        "turn": "36",
+        "duration": "964ms",
+        "e2eLatency": "1669ms",
+        "inputASR": "您解决这个。",
+        "outputTranslation": "First, we can immediately contact the hotel to help you change rooms, ensuring that you can have a better environment to settle in.",
+        "inputTextTokens": "196",
+        "cachedTextTokens": "176",
+        "inputAudioTokens": "1320",
+        "cachedAudioTokens": "1302",
+        "outputTextTokens": "27",
+        "outputAudioTokens": "154",
+        "totalTokens": "1697",
+        "cost": "$0.025570"
+      },
+      {
+        "turn": "37",
+        "duration": "871ms",
+        "e2eLatency": "1099ms",
+        "inputASR": "个问题。",
+        "outputTranslation": "Second.",
+        "inputTextTokens": "222",
+        "cachedTextTokens": "196",
+        "inputAudioTokens": "685",
+        "cachedAudioTokens": "663",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "17",
+        "totalTokens": "927",
+        "cost": "$0.011274"
+      },
+      {
+        "turn": "38",
+        "duration": "839ms",
+        "e2eLatency": "602ms",
+        "inputASR": "提到。",
+        "outputTranslation": "Second.",
+        "inputTextTokens": "224",
+        "cachedTextTokens": "222",
+        "inputAudioTokens": "697",
+        "cachedAudioTokens": "685",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "940",
+        "cost": "$0.011438"
+      },
+      {
+        "turn": "39",
+        "duration": "293ms",
+        "e2eLatency": "677ms",
+        "inputASR": "目前，我为您准备了几个处理方案，您可以根据自己的实际需求选择。选择。",
+        "outputTranslation": "Second.",
+        "inputTextTokens": "226",
+        "cachedTextTokens": "224",
+        "inputAudioTokens": "704",
+        "cachedAudioTokens": "697",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "949",
+        "cost": "$0.011549"
+      },
+      {
+        "turn": "40",
+        "duration": "1ms",
+        "e2eLatency": "947ms",
+        "inputASR": "首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更。用书。都市的。入环境。",
+        "outputTranslation": "Second.",
+        "inputTextTokens": "228",
+        "cachedTextTokens": "226",
+        "inputAudioTokens": "719",
+        "cachedAudioTokens": "704",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "966",
+        "cost": "$0.011778"
+      },
+      {
+        "turn": "41",
+        "duration": "429ms",
+        "e2eLatency": "759ms",
+        "inputASR": "第二。",
+        "outputTranslation": "Second.",
+        "inputTextTokens": "230",
+        "cachedTextTokens": "228",
+        "inputAudioTokens": "730",
+        "cachedAudioTokens": "719",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "16",
+        "totalTokens": "979",
+        "cost": "$0.011950"
+      },
+      {
+        "turn": "42",
+        "duration": "2712ms",
+        "e2eLatency": "1440ms",
+        "inputASR": "如果您对这家酒店已经不满意，我们也可以协调帮您免费取。小丁。订单。B.因为您。您推荐服务。",
+        "outputTranslation": "If you are no longer satisfied with this hotel, we can also arrange to help you cancel the order for free, as you requested.",
+        "inputTextTokens": "232",
+        "cachedTextTokens": "230",
+        "inputAudioTokens": "9386",
+        "cachedAudioTokens": "9287",
+        "outputTextTokens": "28",
+        "outputAudioTokens": "140",
+        "totalTokens": "9786",
+        "cost": "$0.148778"
+      },
+      {
+        "turn": "43",
+        "duration": "1064ms",
+        "e2eLatency": "1072ms",
+        "inputASR": "附近同。",
+        "outputTranslation": "Nearby similar.",
+        "inputTextTokens": "259",
+        "cachedTextTokens": "232",
+        "inputAudioTokens": "1689",
+        "cachedAudioTokens": "1670",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "25",
+        "totalTokens": "1977",
+        "cost": "$0.026969"
+      },
+      {
+        "turn": "44",
+        "duration": "562ms",
+        "e2eLatency": "930ms",
+        "inputASR": "Then.",
+        "outputTranslation": "Then.",
+        "inputTextTokens": "262",
+        "cachedTextTokens": "259",
+        "inputAudioTokens": "858",
+        "cachedAudioTokens": "848",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "15",
+        "totalTokens": "1138",
+        "cost": "$0.013911"
+      },
+      {
+        "turn": "45",
+        "duration": "276ms",
+        "e2eLatency": "929ms",
+        "inputASR": "G.",
+        "outputTranslation": "Or.",
+        "inputTextTokens": "264",
+        "cachedTextTokens": "262",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "14",
+        "totalTokens": "281",
+        "cost": "$0.000731"
+      },
+      {
+        "turn": "46",
+        "duration": "276ms",
+        "e2eLatency": "1523ms",
+        "inputASR": "或者。",
+        "outputTranslation": "Higher quality.",
+        "inputTextTokens": "266",
+        "cachedTextTokens": "264",
+        "inputAudioTokens": "2664",
+        "cachedAudioTokens": "2627",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "25",
+        "totalTokens": "2959",
+        "cost": "$0.041925"
+      },
+      {
+        "turn": "47",
+        "duration": "1348ms",
+        "e2eLatency": "611ms",
+        "inputASR": "更高大。",
+        "outputTranslation": "Other hotels to ensure.",
+        "inputTextTokens": "269",
+        "cachedTextTokens": "266",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "6",
+        "outputAudioTokens": "35",
+        "totalTokens": "310",
+        "cost": "$0.001436"
+      },
+      {
+        "turn": "48",
+        "duration": "1348ms",
+        "e2eLatency": "1180ms",
+        "inputASR": "棒子。",
+        "outputTranslation": "To your.",
+        "inputTextTokens": "274",
+        "cachedTextTokens": "269",
+        "inputAudioTokens": "912",
+        "cachedAudioTokens": "895",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "15",
+        "totalTokens": "1205",
+        "cost": "$0.014751"
+      },
+      {
+        "turn": "49",
+        "duration": "492ms",
+        "e2eLatency": "1057ms",
+        "inputASR": "次的其他。",
+        "outputTranslation": "Your trip will not be affected.",
+        "inputTextTokens": "277",
+        "cachedTextTokens": "274",
+        "inputAudioTokens": "924",
+        "cachedAudioTokens": "912",
+        "outputTextTokens": "8",
+        "outputAudioTokens": "35",
+        "totalTokens": "1244",
+        "cost": "$0.015610"
+      },
+      {
+        "turn": "50",
+        "duration": "265ms",
+        "e2eLatency": "2083ms",
+        "inputASR": "家酒店确保。",
+        "outputTranslation": "Marketing award.",
+        "inputTextTokens": "284",
+        "cachedTextTokens": "277",
+        "inputAudioTokens": "3781",
+        "cachedAudioTokens": "3746",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "24",
+        "totalTokens": "4093",
+        "cost": "$0.059033"
+      },
+      {
+        "turn": "51",
+        "duration": "1483ms",
+        "e2eLatency": "817ms",
+        "inputASR": "到您的。",
+        "outputTranslation": "Your itinerary will not be affected.",
+        "inputTextTokens": "287",
+        "cachedTextTokens": "284",
+        "inputAudioTokens": "2919",
+        "cachedAudioTokens": "2898",
+        "outputTextTokens": "8",
+        "outputAudioTokens": "43",
+        "totalTokens": "3257",
+        "cost": "$0.046465"
+      },
+      {
+        "turn": "52",
+        "duration": "582ms",
+        "e2eLatency": "605ms",
+        "inputASR": "行。",
+        "outputTranslation": "Marketing prize.",
+        "inputTextTokens": "294",
+        "cachedTextTokens": "287",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "28",
+        "totalTokens": "326",
+        "cost": "$0.001223"
+      },
+      {
+        "turn": "53",
+        "duration": "582ms",
+        "e2eLatency": "1311ms",
+        "inputASR": "程不会受到。",
+        "outputTranslation": "Your trip will not be affected.",
+        "inputTextTokens": "297",
+        "cachedTextTokens": "294",
+        "inputAudioTokens": "1008",
+        "cachedAudioTokens": "980",
+        "outputTextTokens": "8",
+        "outputAudioTokens": "36",
+        "totalTokens": "1349",
+        "cost": "$0.016946"
+      },
+      {
+        "turn": "54",
+        "duration": "835ms",
+        "e2eLatency": "696ms",
+        "inputASR": "营销奖。",
+        "outputTranslation": "Marketing award.",
+        "inputTextTokens": "304",
+        "cachedTextTokens": "297",
+        "inputAudioTokens": "1015",
+        "cachedAudioTokens": "1008",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "25",
+        "totalTokens": "1348",
+        "cost": "$0.016692"
+      },
+      {
+        "turn": "55",
+        "duration": "1974ms",
+        "e2eLatency": "1144ms",
+        "inputASR": "第三，我们会主动向酒店方面提出补偿要求。A rule.无身。请防飞。最前。面。",
+        "outputTranslation": "Third, we will proactively request compensation from the hotel.",
+        "inputTextTokens": "307",
+        "cachedTextTokens": "304",
+        "inputAudioTokens": "10571",
+        "cachedAudioTokens": "10496",
+        "outputTextTokens": "12",
+        "outputAudioTokens": "84",
+        "totalTokens": "10974",
+        "cost": "$0.165135"
+      },
+      {
+        "turn": "56",
+        "duration": "4735ms",
+        "e2eLatency": "1198ms",
+        "inputASR": "或者升级您的房型，让您能获得一定的补偿和更好的服务。服务。",
+        "outputTranslation": "Or upgrade your room type, so you can receive some compensation and better service.",
+        "inputTextTokens": "318",
+        "cachedTextTokens": "307",
+        "inputAudioTokens": "12576",
+        "cachedAudioTokens": "12476",
+        "outputTextTokens": "17",
+        "outputAudioTokens": "95",
+        "totalTokens": "13006",
+        "cost": "$0.196248"
+      },
+      {
+        "turn": "57",
+        "duration": "308ms",
+        "e2eLatency": "683ms",
+        "inputASR": "请您考。",
+        "outputTranslation": "Please consider.",
+        "inputTextTokens": "334",
+        "cachedTextTokens": "318",
+        "inputAudioTokens": "2400",
+        "cachedAudioTokens": "2387",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "22",
+        "totalTokens": "2760",
+        "cost": "$0.037850"
+      },
+      {
+        "turn": "58",
+        "duration": "301ms",
+        "e2eLatency": "684ms",
+        "inputASR": "考虑。",
+        "outputTranslation": "It.",
+        "inputTextTokens": "337",
+        "cachedTextTokens": "334",
+        "inputAudioTokens": "2425",
+        "cachedAudioTokens": "2412",
+        "outputTextTokens": "3",
+        "outputAudioTokens": "12",
+        "totalTokens": "2777",
+        "cost": "$0.037908"
+      },
+      {
+        "turn": "59",
+        "duration": "259ms",
+        "e2eLatency": "762ms",
+        "inputASR": "一下。",
+        "outputTranslation": "Which one to choose.",
+        "inputTextTokens": "339",
+        "cachedTextTokens": "337",
+        "inputAudioTokens": "2458",
+        "cachedAudioTokens": "2439",
+        "outputTextTokens": "6",
+        "outputAudioTokens": "25",
+        "totalTokens": "2828",
+        "cost": "$0.038851"
+      },
+      {
+        "turn": "60",
+        "duration": "572ms",
+        "e2eLatency": "512ms",
+        "inputASR": "看看。",
+        "outputTranslation": "Which option.",
+        "inputTextTokens": "344",
+        "cachedTextTokens": "339",
+        "inputAudioTokens": "1242",
+        "cachedAudioTokens": "1235",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "19",
+        "totalTokens": "1609",
+        "cost": "$0.020014"
+      },
+      {
+        "turn": "61",
+        "duration": "31ms",
+        "e2eLatency": "922ms",
+        "inputASR": "看哪个。",
+        "outputTranslation": "But better fits.",
+        "inputTextTokens": "347",
+        "cachedTextTokens": "344",
+        "inputAudioTokens": "1255",
+        "cachedAudioTokens": "1242",
+        "outputTextTokens": "5",
+        "outputAudioTokens": "27",
+        "totalTokens": "1634",
+        "cost": "$0.020482"
+      },
+      {
+        "turn": "62",
+        "duration": "490ms",
+        "e2eLatency": "832ms",
+        "inputASR": "方案。",
+        "outputTranslation": "Your needs.",
+        "inputTextTokens": "351",
+        "cachedTextTokens": "347",
+        "inputAudioTokens": "1266",
+        "cachedAudioTokens": "1255",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "20",
+        "totalTokens": "1641",
+        "cost": "$0.020421"
+      },
+      {
+        "turn": "63",
+        "duration": "460ms",
+        "e2eLatency": "888ms",
+        "inputASR": "但更符合。",
+        "outputTranslation": "And your.",
+        "inputTextTokens": "354",
+        "cachedTextTokens": "351",
+        "inputAudioTokens": "2556",
+        "cachedAudioTokens": "2538",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "15",
+        "totalTokens": "2929",
+        "cost": "$0.040033"
+      },
+      {
+        "turn": "64",
+        "duration": "392ms",
+        "e2eLatency": "843ms",
+        "inputASR": "和您的。",
+        "outputTranslation": "Your needs.",
+        "inputTextTokens": "357",
+        "cachedTextTokens": "354",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "20",
+        "totalTokens": "381",
+        "cost": "$0.001023"
+      },
+      {
+        "turn": "65",
+        "duration": "392ms",
+        "e2eLatency": "1407ms",
+        "inputASR": "的需求。",
+        "outputTranslation": "Your needs.",
+        "inputTextTokens": "360",
+        "cachedTextTokens": "357",
+        "inputAudioTokens": "2621",
+        "cachedAudioTokens": "2591",
+        "outputTextTokens": "4",
+        "outputAudioTokens": "20",
+        "totalTokens": "3005",
+        "cost": "$0.041196"
+      },
+      {
+        "turn": "66",
+        "duration": "2408ms",
+        "e2eLatency": "1240ms",
+        "inputASR": "或者，如果您有其他想法，也可以随时告诉我们。",
+        "outputTranslation": "Or, if you have other ideas, you can also tell us at any time.",
+        "inputTextTokens": "363",
+        "cachedTextTokens": "360",
+        "inputAudioTokens": "5345",
+        "cachedAudioTokens": "5313",
+        "outputTextTokens": "18",
+        "outputAudioTokens": "80",
+        "totalTokens": "5806",
+        "cost": "$0.084974"
+      },
+      {
+        "turn": "67",
+        "duration": "3438ms",
+        "e2eLatency": "1286ms",
+        "inputASR": "我们会一直为您跟进，直到问问题圆满解决。",
+        "outputTranslation": "We will continue to follow up with you until the issue is fully resolved.",
+        "inputTextTokens": "380",
+        "cachedTextTokens": "363",
+        "inputAudioTokens": "6952",
+        "cachedAudioTokens": "6882",
+        "outputTextTokens": "16",
+        "outputAudioTokens": "87",
+        "totalTokens": "7435",
+        "cost": "$0.109835"
+      }
+    ],
+    "totals": {
+      "duration": "52703ms",
+      "avgE2eLatency": "1011ms",
+      "inputTextTokens": "11959",
+      "cachedTextTokens": "11579",
+      "inputAudioTokens": "104917",
+      "cachedAudioTokens": "103501",
+      "outputTextTokens": "462",
+      "outputAudioTokens": "2461",
+      "totalTokens": "119799",
+      "totalCost": "$1.702057"
+    }
+  },
+  "conversationLogs": [
+    {
+      "timestamp": "09:54:36.359",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:36.555",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:37.595",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:38.208",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:38.984",
+      "category": "Conversation",
+      "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+    },
+    {
+      "timestamp": "09:54:40.901",
+      "category": "Conversation",
+      "text": "🔊 We are very sorry that the hotel you stayed at did not meet your expectations."
+    },
+    {
+      "timestamp": "09:54:40.902",
+      "category": "Conversation",
+      "text": "🎤 我们平台。"
+    },
+    {
+      "timestamp": "09:54:40.959",
+      "category": "Conversation",
+      "text": "🔊 Our platform."
+    },
+    {
+      "timestamp": "09:54:40.959",
+      "category": "Conversation",
+      "text": "🎤 还一直非常。"
+    },
+    {
+      "timestamp": "09:54:41.358",
+      "category": "Conversation",
+      "text": "🔊 It has always been very."
+    },
+    {
+      "timestamp": "09:54:41.358",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:41.361",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:41.362",
+      "category": "Conversation",
+      "text": "🎤 非常重视美。"
+    },
+    {
+      "timestamp": "09:54:42.133",
+      "category": "Conversation",
+      "text": "🔊 We attach great importance to beauty."
+    },
+    {
+      "timestamp": "09:54:42.133",
+      "category": "Conversation",
+      "text": "🎤 一位客人。"
+    },
+    {
+      "timestamp": "09:54:42.749",
+      "category": "Conversation",
+      "text": "🔊 A guest."
+    },
+    {
+      "timestamp": "09:54:42.761",
+      "category": "Conversation",
+      "text": "🎤 The."
+    },
+    {
+      "timestamp": "09:54:43.283",
+      "category": "Conversation",
+      "text": "🔊 Very tired."
+    },
+    {
+      "timestamp": "09:54:43.283",
+      "category": "Conversation",
+      "text": "🎤 很困。"
+    },
+    {
+      "timestamp": "09:54:43.774",
+      "category": "Conversation",
+      "text": "🔊 Yes."
+    },
+    {
+      "timestamp": "09:54:43.774",
+      "category": "Conversation",
+      "text": "🎤 对。"
+    },
+    {
+      "timestamp": "09:54:44.272",
+      "category": "Conversation",
+      "text": "🔊 I."
+    },
+    {
+      "timestamp": "09:54:44.272",
+      "category": "Conversation",
+      "text": "🎤 我。"
+    },
+    {
+      "timestamp": "09:54:44.747",
+      "category": "Conversation",
+      "text": "🔊 I am now."
+    },
+    {
+      "timestamp": "09:54:44.748",
+      "category": "Conversation",
+      "text": "🎤 我现在。"
+    },
+    {
+      "timestamp": "09:54:45.716",
+      "category": "Conversation",
+      "text": "🔊 Also here."
+    },
+    {
+      "timestamp": "09:54:45.716",
+      "category": "Conversation",
+      "text": "🎤 在也是。"
+    },
+    {
+      "timestamp": "09:54:47.797",
+      "category": "Conversation",
+      "text": "🔊 Very."
+    },
+    {
+      "timestamp": "09:54:47.797",
+      "category": "Conversation",
+      "text": "🎤 非常。"
+    },
+    {
+      "timestamp": "09:54:48.348",
+      "category": "Conversation",
+      "text": "🔊 Understand."
+    },
+    {
+      "timestamp": "09:54:48.348",
+      "category": "Conversation",
+      "text": "🎤 理解。"
+    },
+    {
+      "timestamp": "09:54:48.841",
+      "category": "Conversation",
+      "text": "🔊 Please now."
+    },
+    {
+      "timestamp": "09:54:48.841",
+      "category": "Conversation",
+      "text": "🎤 请您现在。"
+    },
+    {
+      "timestamp": "09:54:49.377",
+      "category": "Conversation",
+      "text": "🔊 Of the heart."
+    },
+    {
+      "timestamp": "09:54:49.378",
+      "category": "Conversation",
+      "text": "🎤 的心。"
+    },
+    {
+      "timestamp": "09:54:49.848",
+      "category": "Conversation",
+      "text": "🔊 Apply."
+    },
+    {
+      "timestamp": "09:54:49.854",
+      "category": "Conversation",
+      "text": "🎤 申请。"
+    },
+    {
+      "timestamp": "09:54:50.450",
+      "category": "Conversation",
+      "text": "🔊 Mm."
+    },
+    {
+      "timestamp": "09:54:50.456",
+      "category": "Conversation",
+      "text": "🎤 嗯。"
+    },
+    {
+      "timestamp": "09:54:51.558",
+      "category": "Conversation",
+      "text": "🔊 Encounter."
+    },
+    {
+      "timestamp": "09:54:51.558",
+      "category": "Conversation",
+      "text": "🎤 遇到。"
+    },
+    {
+      "timestamp": "09:54:52.148",
+      "category": "Conversation",
+      "text": "🔊 Such."
+    },
+    {
+      "timestamp": "09:54:52.148",
+      "category": "Conversation",
+      "text": "🎤 这样的。"
+    },
+    {
+      "timestamp": "09:54:52.817",
+      "category": "Conversation",
+      "text": "🔊 The situation indeed."
+    },
+    {
+      "timestamp": "09:54:52.817",
+      "category": "Conversation",
+      "text": "🎤 的情。"
+    },
+    {
+      "timestamp": "09:54:53.447",
+      "category": "Conversation",
+      "text": "🔊 Is unpleasant and also very."
+    },
+    {
+      "timestamp": "09:54:53.447",
+      "category": "Conversation",
+      "text": "🎤 情况确实。"
+    },
+    {
+      "timestamp": "09:54:54.039",
+      "category": "Conversation",
+      "text": "🔊 Affect your mood for traveling."
+    },
+    {
+      "timestamp": "09:54:54.039",
+      "category": "Conversation",
+      "text": "🎤 是让人不。"
+    },
+    {
+      "timestamp": "09:54:54.649",
+      "category": "Conversation",
+      "text": "🔊 But please."
+    },
+    {
+      "timestamp": "09:54:54.649",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:54:54.649",
+      "category": "Conversation",
+      "text": "🎤 舒服，也很。"
+    },
+    {
+      "timestamp": "09:54:55.225",
+      "category": "Conversation",
+      "text": "🔊 Please rest assured."
+    },
+    {
+      "timestamp": "09:54:55.225",
+      "category": "Conversation",
+      "text": "🎤 影响出。"
+    },
+    {
+      "timestamp": "09:54:55.881",
+      "category": "Conversation",
+      "text": "🔊 Definitely will."
+    },
+    {
+      "timestamp": "09:54:55.881",
+      "category": "Conversation",
+      "text": "🎤 出行的心情。"
+    },
+    {
+      "timestamp": "09:54:56.600",
+      "category": "Conversation",
+      "text": "🔊 Take seriously."
+    },
+    {
+      "timestamp": "09:54:56.600",
+      "category": "Conversation",
+      "text": "🎤 但请。"
+    },
+    {
+      "timestamp": "09:54:57.196",
+      "category": "Conversation",
+      "text": "🔊 The issue you have."
+    },
+    {
+      "timestamp": "09:54:57.208",
+      "category": "Conversation",
+      "text": "🎤 请您放。"
+    },
+    {
+      "timestamp": "09:54:57.879",
+      "category": "Conversation",
+      "text": "🔊 Actively work for you."
+    },
+    {
+      "timestamp": "09:54:57.879",
+      "category": "Conversation",
+      "text": "🎤 放心。"
+    },
+    {
+      "timestamp": "09:54:58.531",
+      "category": "Conversation",
+      "text": "🔊 Solve this."
+    },
+    {
+      "timestamp": "09:54:58.531",
+      "category": "Conversation",
+      "text": "🎤 For me."
+    },
+    {
+      "timestamp": "09:54:59.042",
+      "category": "Conversation",
+      "text": "🔊 Problem."
+    },
+    {
+      "timestamp": "09:54:59.043",
+      "category": "Conversation",
+      "text": "🎤 一定会。"
+    },
+    {
+      "timestamp": "09:54:59.588",
+      "category": "Conversation",
+      "text": "🔊 Mention."
+    },
+    {
+      "timestamp": "09:54:59.588",
+      "category": "Conversation",
+      "text": "🎤 会认真。"
+    },
+    {
+      "timestamp": "09:55:01.614",
+      "category": "Conversation",
+      "text": "🔊 Mention."
+    },
+    {
+      "timestamp": "09:55:01.614",
+      "category": "Conversation",
+      "text": "🎤 对的。"
+    },
+    {
+      "timestamp": "09:55:03.027",
+      "category": "Conversation",
+      "text": "🔊 Currently, I have prepared several solutions for you, and you can choose according to your actual needs."
+    },
+    {
+      "timestamp": "09:55:03.027",
+      "category": "Conversation",
+      "text": "🎤 在您的。"
+    },
+    {
+      "timestamp": "09:55:04.367",
+      "category": "Conversation",
+      "text": "🔊 Currently, I have prepared several solutions for you. You can choose based on your actual needs."
+    },
+    {
+      "timestamp": "09:55:04.368",
+      "category": "Conversation",
+      "text": "🎤 的问题。"
+    },
+    {
+      "timestamp": "09:55:06.159",
+      "category": "Conversation",
+      "text": "🔊 Currently, I have prepared several solutions for you. You can choose according to your actual needs."
+    },
+    {
+      "timestamp": "09:55:06.159",
+      "category": "Conversation",
+      "text": "🎤 积极为您。"
+    },
+    {
+      "timestamp": "09:55:07.632",
+      "category": "Conversation",
+      "text": "🔊 Currently, I have prepared several solutions for you, and you can choose according to your actual needs."
+    },
+    {
+      "timestamp": "09:55:07.633",
+      "category": "Conversation",
+      "text": "🎤 您解决这个。"
+    },
+    {
+      "timestamp": "09:55:09.308",
+      "category": "Conversation",
+      "text": "🔊 First, we can immediately contact the hotel to help you change rooms, ensuring that you can have a better environment to settle in."
+    },
+    {
+      "timestamp": "09:55:09.321",
+      "category": "Conversation",
+      "text": "🎤 个问题。"
+    },
+    {
+      "timestamp": "09:55:09.918",
+      "category": "Conversation",
+      "text": "🔊 Second."
+    },
+    {
+      "timestamp": "09:55:09.918",
+      "category": "Conversation",
+      "text": "🎤 提到。"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🔊 Second."
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.450",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.451",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.451",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:10.451",
+      "category": "Conversation",
+      "text": "🎤 目前，我为您准备了几个处理方案，您可以根据自己的实际需求选择。选择。"
+    },
+    {
+      "timestamp": "09:55:11.067",
+      "category": "Conversation",
+      "text": "🔊 Second."
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:11.068",
+      "category": "Conversation",
+      "text": "🎤 首先，我们可以立即联系酒店，帮您更换房间，确保您能有一个更。用书。都市的。入环境。"
+    },
+    {
+      "timestamp": "09:55:11.612",
+      "category": "Conversation",
+      "text": "🔊 Second."
+    },
+    {
+      "timestamp": "09:55:11.612",
+      "category": "Conversation",
+      "text": "🎤 第二。"
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🔊 Second."
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.151",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.344",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:12.820",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:13.221",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:13.815",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:13.934",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:14.097",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:14.285",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:14.442",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:14.619",
+      "category": "Conversation",
+      "text": "🎤 如果您对这家酒店已经不满意，我们也可以协调帮您免费取。小丁。订单。B.因为您。您推荐服务。"
+    },
+    {
+      "timestamp": "09:55:16.213",
+      "category": "Conversation",
+      "text": "🔊 If you are no longer satisfied with this hotel, we can also arrange to help you cancel the order for free, as you requested."
+    },
+    {
+      "timestamp": "09:55:16.235",
+      "category": "Conversation",
+      "text": "🎤 附近同。"
+    },
+    {
+      "timestamp": "09:55:16.846",
+      "category": "Conversation",
+      "text": "🔊 Nearby similar."
+    },
+    {
+      "timestamp": "09:55:16.846",
+      "category": "Conversation",
+      "text": "🎤 Then."
+    },
+    {
+      "timestamp": "09:55:17.443",
+      "category": "Conversation",
+      "text": "🔊 Then."
+    },
+    {
+      "timestamp": "09:55:17.443",
+      "category": "Conversation",
+      "text": "🎤 G."
+    },
+    {
+      "timestamp": "09:55:17.939",
+      "category": "Conversation",
+      "text": "🔊 Or."
+    },
+    {
+      "timestamp": "09:55:17.939",
+      "category": "Conversation",
+      "text": "🎤 或者。"
+    },
+    {
+      "timestamp": "09:55:18.566",
+      "category": "Conversation",
+      "text": "🔊 Higher quality."
+    },
+    {
+      "timestamp": "09:55:18.566",
+      "category": "Conversation",
+      "text": "🎤 更高大。"
+    },
+    {
+      "timestamp": "09:55:19.225",
+      "category": "Conversation",
+      "text": "🔊 Other hotels to ensure."
+    },
+    {
+      "timestamp": "09:55:19.225",
+      "category": "Conversation",
+      "text": "🎤 棒子。"
+    },
+    {
+      "timestamp": "09:55:19.760",
+      "category": "Conversation",
+      "text": "🔊 To your."
+    },
+    {
+      "timestamp": "09:55:19.760",
+      "category": "Conversation",
+      "text": "🎤 次的其他。"
+    },
+    {
+      "timestamp": "09:55:20.412",
+      "category": "Conversation",
+      "text": "🔊 Your trip will not be affected."
+    },
+    {
+      "timestamp": "09:55:20.412",
+      "category": "Conversation",
+      "text": "🎤 家酒店确保。"
+    },
+    {
+      "timestamp": "09:55:21.919",
+      "category": "Conversation",
+      "text": "🔊 Marketing award."
+    },
+    {
+      "timestamp": "09:55:21.919",
+      "category": "Conversation",
+      "text": "🎤 到您的。"
+    },
+    {
+      "timestamp": "09:55:22.799",
+      "category": "Conversation",
+      "text": "🔊 Your itinerary will not be affected."
+    },
+    {
+      "timestamp": "09:55:22.799",
+      "category": "Conversation",
+      "text": "🎤 行。"
+    },
+    {
+      "timestamp": "09:55:23.384",
+      "category": "Conversation",
+      "text": "🔊 Marketing prize."
+    },
+    {
+      "timestamp": "09:55:23.401",
+      "category": "Conversation",
+      "text": "🎤 程不会受到。"
+    },
+    {
+      "timestamp": "09:55:24.077",
+      "category": "Conversation",
+      "text": "🔊 Your trip will not be affected."
+    },
+    {
+      "timestamp": "09:55:24.077",
+      "category": "Conversation",
+      "text": "🎤 营销奖。"
+    },
+    {
+      "timestamp": "09:55:24.635",
+      "category": "Conversation",
+      "text": "🔊 Marketing award."
+    },
+    {
+      "timestamp": "09:55:24.656",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.677",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.677",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.678",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.678",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.678",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.678",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.678",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:24.838",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:25.453",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:25.606",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:25.752",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:25.916",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:26.121",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:26.470",
+      "category": "Conversation",
+      "text": "🎤 第三，我们会主动向酒店方面提出补偿要求。A rule.无身。请防飞。最前。面。"
+    },
+    {
+      "timestamp": "09:55:27.601",
+      "category": "Conversation",
+      "text": "🔊 Third, we will proactively request compensation from the hotel."
+    },
+    {
+      "timestamp": "09:55:27.601",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:27.601",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:27.601",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:27.746",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:28.036",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:28.439",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:28.723",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:29.074",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:29.691",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:30.213",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:30.784",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:31.484",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:31.596",
+      "category": "Conversation",
+      "text": "🎤 或者升级您的房型，让您能获得一定的补偿和更好的服务。服务。"
+    },
+    {
+      "timestamp": "09:55:32.792",
+      "category": "Conversation",
+      "text": "🔊 Or upgrade your room type, so you can receive some compensation and better service."
+    },
+    {
+      "timestamp": "09:55:32.792",
+      "category": "Conversation",
+      "text": "🎤 请您考。"
+    },
+    {
+      "timestamp": "09:55:33.329",
+      "category": "Conversation",
+      "text": "🔊 Please consider."
+    },
+    {
+      "timestamp": "09:55:33.329",
+      "category": "Conversation",
+      "text": "🎤 考虑。"
+    },
+    {
+      "timestamp": "09:55:33.834",
+      "category": "Conversation",
+      "text": "🔊 It."
+    },
+    {
+      "timestamp": "09:55:33.834",
+      "category": "Conversation",
+      "text": "🎤 一下。"
+    },
+    {
+      "timestamp": "09:55:34.457",
+      "category": "Conversation",
+      "text": "🔊 Which one to choose."
+    },
+    {
+      "timestamp": "09:55:34.457",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:34.458",
+      "category": "Conversation",
+      "text": "🎤 看看。"
+    },
+    {
+      "timestamp": "09:55:34.972",
+      "category": "Conversation",
+      "text": "🔊 Which option."
+    },
+    {
+      "timestamp": "09:55:34.972",
+      "category": "Conversation",
+      "text": "🎤 看哪个。"
+    },
+    {
+      "timestamp": "09:55:35.622",
+      "category": "Conversation",
+      "text": "🔊 But better fits."
+    },
+    {
+      "timestamp": "09:55:35.623",
+      "category": "Conversation",
+      "text": "🎤 方案。"
+    },
+    {
+      "timestamp": "09:55:36.218",
+      "category": "Conversation",
+      "text": "🔊 Your needs."
+    },
+    {
+      "timestamp": "09:55:36.218",
+      "category": "Conversation",
+      "text": "🎤 但更符合。"
+    },
+    {
+      "timestamp": "09:55:37.062",
+      "category": "Conversation",
+      "text": "🔊 And your."
+    },
+    {
+      "timestamp": "09:55:37.062",
+      "category": "Conversation",
+      "text": "🎤 和您的。"
+    },
+    {
+      "timestamp": "09:55:37.585",
+      "category": "Conversation",
+      "text": "🔊 Your needs."
+    },
+    {
+      "timestamp": "09:55:37.585",
+      "category": "Conversation",
+      "text": "🎤 的需求。"
+    },
+    {
+      "timestamp": "09:55:38.141",
+      "category": "Conversation",
+      "text": "🔊 Your needs."
+    },
+    {
+      "timestamp": "09:55:38.141",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:38.141",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:38.141",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:38.142",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:38.463",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:38.936",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:39.358",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:39.772",
+      "category": "Conversation",
+      "text": "🎤 或者，如果您有其他想法，也可以随时告诉我们。"
+    },
+    {
+      "timestamp": "09:55:40.766",
+      "category": "Conversation",
+      "text": "🔊 Or, if you have other ideas, you can also tell us at any time."
+    },
+    {
+      "timestamp": "09:55:40.766",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:41.597",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:41.888",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:42.233",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:42.725",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "09:55:43.673",
+      "category": "Conversation",
+      "text": "🎤 我们会一直为您跟进，直到问问题圆满解决。"
+    },
+    {
+      "timestamp": "09:55:44.713",
+      "category": "Conversation",
+      "text": "🔊 We will continue to follow up with you until the issue is fully resolved."
+    }
+  ],
+  "referenceText": "非常抱歉您入住的酒店没有达到您的预期。我们平台一直非常重视每一位客人的反馈，我现在也非常理解您现在的心情，遇到这样的情况确实让人不舒服，也很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择：首先我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境；第二，如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，并为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响；第三我们会主动向酒店方面提出补偿要求，比如申请房费减免，或者升级您的房型，让您能获得一定的补偿和更好的服务。请您考虑一下，看看哪个方案更符合您的需求，或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。"
+}

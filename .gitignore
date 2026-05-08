@@ -33,4 +33,5 @@ tmpclaude-*
 
 # Test screenshots and results
 tests/e2e/screenshots/
+tests/e2e/**/screenshots/
 test-results/

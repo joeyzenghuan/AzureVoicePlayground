@@ -1,0 +1,397 @@
+{
+  "config": {
+    "model": "gpt-4.1",
+    "targetLanguage": "en",
+    "prompt": "You are a simultaneous interpreter.\nYou will translate Chinese to English, and translate English to Chinese.\n\nRules:\n0) Don't answer any question, just translate anything input.\n1) Translate sentence by sentence (output each sentence as it completes).\n2) Keep context consistent across turns (pronouns, terms, tone, references).\n3) Preserve meaning faithfully; do not add explanations or extra content.\n4) Keep proper nouns, numbers, and code as-is unless a standard translation is obvious.\n5) Output translation text only.",
+    "asrModel": "azure-speech",
+    "asrLanguages": "zh,en",
+    "turnDetectionType": "azure_semantic_vad",
+    "threshold": 0.5,
+    "prefixPaddingInMs": 400,
+    "silenceDurationInMs": 350,
+    "speechDurationInMs": 80,
+    "removeFillerWords": false,
+    "vadLanguages": "zh,Chinese",
+    "voiceProvider": "azure-standard",
+    "voiceName": "en-US-AndrewMultilingualNeural",
+    "inputAudioFormat": "pcm16",
+    "inputAudioSamplingRate": 16000,
+    "outputAudioFormat": "pcm16",
+    "interruptResponse": false
+  },
+  "metrics": {
+    "stats": {
+      "Turns": "14",
+      "Session": "85.3s",
+      "Cost": "$0.2395",
+      "Cost/sec": "$0.00281",
+      "Cost/Input": "$0.00465",
+      "Avg E2E Latency": "1.56s",
+      "P50 E2E Latency": "1.38s",
+      "P90 E2E Latency": "2.12s",
+      "Input Audio": "51.5s",
+      "Output Audio": "64.3s"
+    },
+    "turns": [
+      {
+        "turn": "1",
+        "duration": "3833ms",
+        "e2eLatency": "1391ms",
+        "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+        "outputTranslation": "We are very sorry that the hotel you stayed in did not meet your expectations.",
+        "inputTextTokens": "0",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "167",
+        "cachedAudioTokens": "74",
+        "outputTextTokens": "17",
+        "outputAudioTokens": "90",
+        "totalTokens": "274",
+        "cost": "$0.006837"
+      },
+      {
+        "turn": "2",
+        "duration": "2292ms",
+        "e2eLatency": "1380ms",
+        "inputASR": "我现在非常理解，理解您现在的心情。",
+        "outputTranslation": "I completely understand, and I understand how you are feeling right now.",
+        "inputTextTokens": "16",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "126",
+        "cachedAudioTokens": "93",
+        "outputTextTokens": "15",
+        "outputAudioTokens": "80",
+        "totalTokens": "237",
+        "cost": "$0.005856"
+      },
+      {
+        "turn": "3",
+        "duration": "3074ms",
+        "e2eLatency": "1376ms",
+        "inputASR": "遇到这样的情况，确实是很影响出行的心情。",
+        "outputTranslation": "Encountering such a situation does indeed affect the mood of your trip.",
+        "inputTextTokens": "30",
+        "cachedTextTokens": "16",
+        "inputAudioTokens": "192",
+        "cachedAudioTokens": "126",
+        "outputTextTokens": "15",
+        "outputAudioTokens": "94",
+        "totalTokens": "331",
+        "cost": "$0.007722"
+      },
+      {
+        "turn": "4",
+        "duration": "5339ms",
+        "e2eLatency": "1796ms",
+        "inputASR": "但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。",
+        "outputTranslation": "But please rest assured, we will definitely take your issue seriously and actively work to resolve it for you.",
+        "inputTextTokens": "44",
+        "cachedTextTokens": "30",
+        "inputAudioTokens": "302",
+        "cachedAudioTokens": "192",
+        "outputTextTokens": "22",
+        "outputAudioTokens": "128",
+        "totalTokens": "496",
+        "cost": "$0.011335"
+      },
+      {
+        "turn": "5",
+        "duration": "2047ms",
+        "e2eLatency": "1292ms",
+        "inputASR": "目前，我为您准备了几个处理方案。",
+        "outputTranslation": "At present, I have prepared several solutions for you.",
+        "inputTextTokens": "65",
+        "cachedTextTokens": "44",
+        "inputAudioTokens": "347",
+        "cachedAudioTokens": "302",
+        "outputTextTokens": "12",
+        "outputAudioTokens": "67",
+        "totalTokens": "491",
+        "cost": "$0.010018"
+      },
+      {
+        "turn": "6",
+        "duration": "2500ms",
+        "e2eLatency": "1052ms",
+        "inputASR": "您可以根据自己的实际需求选择。",
+        "outputTranslation": "You can choose according to your actual needs.",
+        "inputTextTokens": "76",
+        "cachedTextTokens": "65",
+        "inputAudioTokens": "400",
+        "cachedAudioTokens": "347",
+        "outputTextTokens": "10",
+        "outputAudioTokens": "45",
+        "totalTokens": "531",
+        "cost": "$0.010281"
+      },
+      {
+        "turn": "7",
+        "duration": "5666ms",
+        "e2eLatency": "1701ms",
+        "inputASR": "首先，我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境。",
+        "outputTranslation": "First, we can immediately contact the hotel to help you change rooms and ensure that you have a more comfortable stay.",
+        "inputTextTokens": "85",
+        "cachedTextTokens": "76",
+        "inputAudioTokens": "517",
+        "cachedAudioTokens": "400",
+        "outputTextTokens": "24",
+        "outputAudioTokens": "135",
+        "totalTokens": "761",
+        "cost": "$0.016224"
+      },
+      {
+        "turn": "8",
+        "duration": "4743ms",
+        "e2eLatency": "1629ms",
+        "inputASR": "如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。",
+        "outputTranslation": "If you are no longer satisfied with this hotel, we can also help coordinate a free cancellation of your booking.",
+        "inputTextTokens": "108",
+        "cachedTextTokens": "85",
+        "inputAudioTokens": "1180",
+        "cachedAudioTokens": "1078",
+        "outputTextTokens": "23",
+        "outputAudioTokens": "118",
+        "totalTokens": "1429",
+        "cost": "$0.028842"
+      },
+      {
+        "turn": "9",
+        "duration": "6400ms",
+        "e2eLatency": "2119ms",
+        "inputASR": "我们会为您推荐附近同等等级或者更高档次的其他酒店，确保您的行程不会受到影响。",
+        "outputTranslation": "We will recommend other hotels nearby of the same level or of a higher standard to ensure that your trip is not affected.",
+        "inputTextTokens": "130",
+        "cachedTextTokens": "108",
+        "inputAudioTokens": "749",
+        "cachedAudioTokens": "619",
+        "outputTextTokens": "25",
+        "outputAudioTokens": "140",
+        "totalTokens": "1044",
+        "cost": "$0.021317"
+      },
+      {
+        "turn": "10",
+        "duration": "6660ms",
+        "e2eLatency": "3178ms",
+        "inputASR": "最后一个方案是我们想向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。",
+        "outputTranslation": "The final option is that we can request compensation from the hotel, such as applying for a room rate discount or an upgrade of your room type.",
+        "inputTextTokens": "154",
+        "cachedTextTokens": "130",
+        "inputAudioTokens": "885",
+        "cachedAudioTokens": "749",
+        "outputTextTokens": "30",
+        "outputAudioTokens": "150",
+        "totalTokens": "1219",
+        "cost": "$0.024669"
+      },
+      {
+        "turn": "11",
+        "duration": "2835ms",
+        "e2eLatency": "1418ms",
+        "inputASR": "请您考虑一下，看看哪个方案更符合您的需求。",
+        "outputTranslation": "Please consider which option better suits your needs.",
+        "inputTextTokens": "183",
+        "cachedTextTokens": "154",
+        "inputAudioTokens": "946",
+        "cachedAudioTokens": "885",
+        "outputTextTokens": "10",
+        "outputAudioTokens": "54",
+        "totalTokens": "1193",
+        "cost": "$0.022218"
+      },
+      {
+        "turn": "12",
+        "duration": "2781ms",
+        "e2eLatency": "1374ms",
+        "inputASR": "或者，如果您有其他想法的话，也可以随时告诉我们。",
+        "outputTranslation": "Or, if you have any other ideas, you can let us know at any time.",
+        "inputTextTokens": "192",
+        "cachedTextTokens": "183",
+        "inputAudioTokens": "1006",
+        "cachedAudioTokens": "946",
+        "outputTextTokens": "19",
+        "outputAudioTokens": "79",
+        "totalTokens": "1296",
+        "cost": "$0.024683"
+      },
+      {
+        "turn": "13",
+        "duration": "1483ms",
+        "e2eLatency": "1008ms",
+        "inputASR": "我们会一直为您跟进。",
+        "outputTranslation": "We will continue to follow up for you.",
+        "inputTextTokens": "210",
+        "cachedTextTokens": "192",
+        "inputAudioTokens": "1039",
+        "cachedAudioTokens": "1006",
+        "outputTextTokens": "10",
+        "outputAudioTokens": "41",
+        "totalTokens": "1300",
+        "cost": "$0.023890"
+      },
+      {
+        "turn": "14",
+        "duration": "1849ms",
+        "e2eLatency": "1118ms",
+        "inputASR": "直到问题圆满解决。",
+        "outputTranslation": "Until the issue is satisfactorily resolved.",
+        "inputTextTokens": "219",
+        "cachedTextTokens": "210",
+        "inputAudioTokens": "1078",
+        "cachedAudioTokens": "1039",
+        "outputTextTokens": "9",
+        "outputAudioTokens": "64",
+        "totalTokens": "1370",
+        "cost": "$0.025595"
+      }
+    ],
+    "totals": {
+      "duration": "51502ms",
+      "avgE2eLatency": "1559ms",
+      "inputTextTokens": "1512",
+      "cachedTextTokens": "1293",
+      "inputAudioTokens": "8934",
+      "cachedAudioTokens": "7856",
+      "outputTextTokens": "241",
+      "outputAudioTokens": "1285",
+      "totalTokens": "11972",
+      "totalCost": "$0.239486"
+    }
+  },
+  "conversationLogs": [
+    {
+      "timestamp": "12:14:31.382",
+      "text": "🎤 非常抱歉，您入住的酒店没有达到您的预期。"
+    },
+    {
+      "timestamp": "12:14:33.043",
+      "text": "🔊 We are very sorry that the hotel you stayed in did not meet your expectations."
+    },
+    {
+      "timestamp": "12:14:33.043",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "12:14:34.299",
+      "text": "🎤 我现在非常理解，理解您现在的心情。"
+    },
+    {
+      "timestamp": "12:14:35.470",
+      "text": "🔊 I completely understand, and I understand how you are feeling right now."
+    },
+    {
+      "timestamp": "12:14:38.281",
+      "text": "🎤 遇到这样的情况，确实是很影响出行的心情。"
+    },
+    {
+      "timestamp": "12:14:39.323",
+      "text": "🔊 Encountering such a situation does indeed affect the mood of your trip."
+    },
+    {
+      "timestamp": "12:14:44.689",
+      "text": "🎤 但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。"
+    },
+    {
+      "timestamp": "12:14:46.028",
+      "text": "🔊 But please rest assured, we will definitely take your issue seriously and actively work to resolve it for you."
+    },
+    {
+      "timestamp": "12:14:47.167",
+      "text": "🎤 目前，我为您准备了几个处理方案。"
+    },
+    {
+      "timestamp": "12:14:48.254",
+      "text": "🔊 At present, I have prepared several solutions for you."
+    },
+    {
+      "timestamp": "12:14:50.003",
+      "text": "🎤 您可以根据自己的实际需求选择。"
+    },
+    {
+      "timestamp": "12:14:50.805",
+      "text": "🔊 You can choose according to your actual needs."
+    },
+    {
+      "timestamp": "12:14:56.889",
+      "text": "🎤 首先，我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境。"
+    },
+    {
+      "timestamp": "12:14:58.286",
+      "text": "🔊 First, we can immediately contact the hotel to help you change rooms and ensure that you have a more comfortable stay."
+    },
+    {
+      "timestamp": "12:14:59.266",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "12:15:02.242",
+      "text": "🎤 如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。"
+    },
+    {
+      "timestamp": "12:15:03.541",
+      "text": "🔊 If you are no longer satisfied with this hotel, we can also help coordinate a free cancellation of your booking."
+    },
+    {
+      "timestamp": "12:15:09.494",
+      "text": "🎤 我们会为您推荐附近同等等级或者更高档次的其他酒店，确保您的行程不会受到影响。"
+    },
+    {
+      "timestamp": "12:15:11.205",
+      "text": "🔊 We will recommend other hotels nearby of the same level or of a higher standard to ensure that your trip is not affected."
+    },
+    {
+      "timestamp": "12:15:16.979",
+      "text": "🎤 最后一个方案是我们想向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。"
+    },
+    {
+      "timestamp": "12:15:19.890",
+      "text": "🔊 The final option is that we can request compensation from the hotel, such as applying for a room rate discount or an upgrade of your room type."
+    },
+    {
+      "timestamp": "12:15:20.496",
+      "text": "🎤 请您考虑一下，看看哪个方案更符合您的需求。"
+    },
+    {
+      "timestamp": "12:15:21.639",
+      "text": "🔊 Please consider which option better suits your needs."
+    },
+    {
+      "timestamp": "12:15:24.372",
+      "text": "🎤 或者，如果您有其他想法的话，也可以随时告诉我们。"
+    },
+    {
+      "timestamp": "12:15:25.512",
+      "text": "🔊 Or, if you have any other ideas, you can let us know at any time."
+    },
+    {
+      "timestamp": "12:15:26.594",
+      "text": "🎤 我们会一直为您跟进。"
+    },
+    {
+      "timestamp": "12:15:27.422",
+      "text": "🔊 We will continue to follow up for you."
+    },
+    {
+      "timestamp": "12:15:28.771",
+      "text": "🎤 直到问题圆满解决。"
+    },
+    {
+      "timestamp": "12:15:29.697",
+      "text": "🔊 Until the issue is satisfactorily resolved."
+    }
+  ],
+  "referenceText": "非常抱歉您入住的酒店没有达到您的预期。我现在非常理解您现在的心情。遇到这样的情况确实很影响出行的心情。但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择：首先我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境；如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响.最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。请您考虑一下，看看哪个方案更符合您的需求。或者如果您有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+  "referenceSentences": [
+    "非常抱歉您入住的酒店没有达到您的预期。",
+    "我现在非常理解您现在的心情。",
+    "遇到这样的情况确实很影响出行的心情。",
+    "但请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。",
+    "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择：",
+    "首先我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境；",
+    "如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单，",
+    "我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响.",
+    "最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。",
+    "请您考虑一下，看看哪个方案更符合您的需求。",
+    "或者如果您有其他想法，也可以随时告诉我们。",
+    "我们会一直为您跟进，直到问题圆满解决。"
+  ]
+}

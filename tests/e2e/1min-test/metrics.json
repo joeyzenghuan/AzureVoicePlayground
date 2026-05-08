@@ -1,0 +1,301 @@
+{
+  "config": {
+    "model": "gpt-4.1-mini",
+    "targetLanguage": "en",
+    "prompt": "You are a simultaneous interpreter.\nTarget language: en.\n\nRules:\n1) Translate sentence by sentence (output each sentence as it completes).\n2) Keep context consistent across turns (pronouns, terms, tone, references).\n3) Preserve meaning faithfully; do not add explanations or extra content.\n4) Keep proper nouns, numbers, and code as-is unless a standard translation is obvious.\n5) Output translation text only.",
+    "asrModel": "azure-speech",
+    "asrLanguages": "zh,en",
+    "turnDetectionType": "server_vad",
+    "threshold": 0.5,
+    "prefixPaddingInMs": 500,
+    "silenceDurationInMs": 300,
+    "voiceProvider": "azure-standard",
+    "voiceName": "en-US-AndrewMultilingualNeural",
+    "inputAudioFormat": "pcm16",
+    "inputAudioSamplingRate": 16000,
+    "outputAudioFormat": "pcm16",
+    "interruptResponse": false,
+    "removeFillerWords": false,
+    "speechDurationInMs": 80
+  },
+  "metrics": {
+    "stats": {
+      "Turns": "8",
+      "Session": "77.0s",
+      "Cost": "$0.1556",
+      "Cost/sec": "$0.00202",
+      "Cost/Input": "$0.00252",
+      "Avg E2E Latency": "1.86s",
+      "P50 E2E Latency": "1.66s",
+      "P90 E2E Latency": "3.04s",
+      "Input Audio": "61.7s",
+      "Output Audio": "84.0s"
+    },
+    "turns": [
+      {
+        "turn": "1",
+        "duration": "8171ms",
+        "e2eLatency": "1262ms",
+        "inputASR": "各位投资者，各位分析师，大家好，下面由我层行为大家简要回顾携程集团2025年度财务业绩。",
+        "outputTranslation": "Dear investors and analysts, hello everyone. I will now briefly review Ctrip Group's financial performance for the year 2025.",
+        "inputTextTokens": "0",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "222",
+        "cachedAudioTokens": "117",
+        "outputTextTokens": "28",
+        "outputAudioTokens": "163",
+        "totalTokens": "413",
+        "cost": "$0.008822"
+      },
+      {
+        "turn": "2",
+        "duration": "1230ms",
+        "e2eLatency": "817ms",
+        "inputASR": "全年实现净。",
+        "outputTranslation": "The full year achieved a net.",
+        "inputTextTokens": "26",
+        "cachedTextTokens": "0",
+        "inputAudioTokens": "0",
+        "cachedAudioTokens": "0",
+        "outputTextTokens": "9",
+        "outputAudioTokens": "38",
+        "totalTokens": "73",
+        "cost": "$0.001295"
+      },
+      {
+        "turn": "3",
+        "duration": "4090ms",
+        "e2eLatency": "1661ms",
+        "inputASR": "约人民币538亿元，同比增长18.5%。",
+        "outputTranslation": "Approximately RMB 53.8 billion, representing a year-on-year growth of 18.5%.",
+        "inputTextTokens": "33",
+        "cachedTextTokens": "26",
+        "inputAudioTokens": "281",
+        "cachedAudioTokens": "234",
+        "outputTextTokens": "22",
+        "outputAudioTokens": "165",
+        "totalTokens": "501",
+        "cost": "$0.009826"
+      },
+      {
+        "turn": "4",
+        "duration": "5877ms",
+        "e2eLatency": "1741ms",
+        "inputASR": "得益于国际业务的加速扩张，海外GMV总交易额同比增长超过70%。",
+        "outputTranslation": "Thanks to the accelerated expansion of international business, the total overseas GMV transaction volume increased by more than 70% year-on-year.",
+        "inputTextTokens": "53",
+        "cachedTextTokens": "33",
+        "inputAudioTokens": "394",
+        "cachedAudioTokens": "329",
+        "outputTextTokens": "29",
+        "outputAudioTokens": "206",
+        "totalTokens": "682",
+        "cost": "$0.012939"
+      },
+      {
+        "turn": "5",
+        "duration": "11502ms",
+        "e2eLatency": "2738ms",
+        "inputASR": "现金流方面，全年经营性现金流OCF经营现金流约210亿元FCF自由现金流，约180亿元FCF转化率持续保持在高位。",
+        "outputTranslation": "In terms of cash flow, the full-year operating cash flow (OCF) was approximately RMB 21 billion, and free cash flow (FCF) was about RMB 18 billion, with the FCF conversion rate remaining consistently high.",
+        "inputTextTokens": "80",
+        "cachedTextTokens": "53",
+        "inputAudioTokens": "637",
+        "cachedAudioTokens": "514",
+        "outputTextTokens": "50",
+        "outputAudioTokens": "313",
+        "totalTokens": "1080",
+        "cost": "$0.020256"
+      },
+      {
+        "turn": "6",
+        "duration": "11213ms",
+        "e2eLatency": "3043ms",
+        "inputASR": "截至年底，现金及等价物加短期投资合计约800亿元，资产负债率维持在较低水平，DE Ratio资产负债率约0.35 。",
+        "outputTranslation": "As of the end of the year, cash and cash equivalents plus short-term investments totaled approximately RMB 80 billion, and the debt-to-equity ratio remained at a low level, with a DE ratio of about 0.35.",
+        "inputTextTokens": "128",
+        "cachedTextTokens": "80",
+        "inputAudioTokens": "1281",
+        "cachedAudioTokens": "1159",
+        "outputTextTokens": "49",
+        "outputAudioTokens": "288",
+        "totalTokens": "1746",
+        "cost": "$0.029342"
+      },
+      {
+        "turn": "7",
+        "duration": "7843ms",
+        "e2eLatency": "2079ms",
+        "inputASR": "展望2026年，公司将继续通过提升TakeRate佣金率和优化KAC获客成本来巩固盈利能力。",
+        "outputTranslation": "Looking ahead to 2026, the company will continue to consolidate its profitability by increasing the Take Rate commission rate and optimizing the KAC customer acquisition cost.",
+        "inputTextTokens": "175",
+        "cachedTextTokens": "128",
+        "inputAudioTokens": "544",
+        "cachedAudioTokens": "462",
+        "outputTextTokens": "33",
+        "outputAudioTokens": "216",
+        "totalTokens": "968",
+        "cost": "$0.015685"
+      },
+      {
+        "turn": "8",
+        "duration": "11786ms",
+        "e2eLatency": "1572ms",
+        "inputASR": "以上是本年度财报的核心要点，感谢各位的关注。各位投资者、各位分析师，大家好，下面由我曾行为大家简要回顾携程集团2025年度财务业绩。",
+        "outputTranslation": "The above are the key points of this year's financial report. Thank you all for your attention. Dear investors and analysts, hello everyone. I, Zeng, will now briefly review Ctrip Group's financial performance for the year 2025.",
+        "inputTextTokens": "206",
+        "cachedTextTokens": "175",
+        "inputAudioTokens": "3102",
+        "cachedAudioTokens": "2967",
+        "outputTextTokens": "51",
+        "outputAudioTokens": "292",
+        "totalTokens": "3651",
+        "cost": "$0.057473"
+      }
+    ],
+    "totals": {
+      "duration": "61712ms",
+      "avgE2eLatency": "1864ms",
+      "inputTextTokens": "701",
+      "cachedTextTokens": "495",
+      "inputAudioTokens": "6461",
+      "cachedAudioTokens": "5782",
+      "outputTextTokens": "271",
+      "outputAudioTokens": "1681",
+      "totalTokens": "9114",
+      "totalCost": "$0.155638"
+    }
+  },
+  "conversationLogs": [
+    {
+      "timestamp": "23:27:00.240",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:06.102",
+      "category": "Conversation",
+      "text": "🎤 各位投资者，各位分析师，大家好，下面由我层行为大家简要回顾携程集团2025年度财务业绩。"
+    },
+    {
+      "timestamp": "23:27:08.006",
+      "category": "Conversation",
+      "text": "🔊 Dear investors and analysts, hello everyone. I will now briefly review Ctrip Group's financial performance for the year 2025."
+    },
+    {
+      "timestamp": "23:27:08.091",
+      "category": "Conversation",
+      "text": "🎤 全年实现净。"
+    },
+    {
+      "timestamp": "23:27:08.792",
+      "category": "Conversation",
+      "text": "🔊 The full year achieved a net."
+    },
+    {
+      "timestamp": "23:27:10.419",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:12.584",
+      "category": "Conversation",
+      "text": "🎤 约人民币538亿元，同比增长18.5%。"
+    },
+    {
+      "timestamp": "23:27:14.435",
+      "category": "Conversation",
+      "text": "🔊 Approximately RMB 53.8 billion, representing a year-on-year growth of 18.5%."
+    },
+    {
+      "timestamp": "23:27:15.574",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:19.572",
+      "category": "Conversation",
+      "text": "🎤 得益于国际业务的加速扩张，海外GMV总交易额同比增长超过70%。"
+    },
+    {
+      "timestamp": "23:27:21.751",
+      "category": "Conversation",
+      "text": "🔊 Thanks to the accelerated expansion of international business, the total overseas GMV transaction volume increased by more than 70% year-on-year."
+    },
+    {
+      "timestamp": "23:27:28.071",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:32.451",
+      "category": "Conversation",
+      "text": "🎤 现金流方面，全年经营性现金流OCF经营现金流约210亿元FCF自由现金流，约180亿元FCF转化率持续保持在高位。"
+    },
+    {
+      "timestamp": "23:27:35.671",
+      "category": "Conversation",
+      "text": "🔊 In terms of cash flow, the full-year operating cash flow (OCF) was approximately RMB 21 billion, and free cash flow (FCF) was about RMB 18 billion, with the FCF conversion rate remaining consistently high."
+    },
+    {
+      "timestamp": "23:27:38.060",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:41.413",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:44.753",
+      "category": "Conversation",
+      "text": "🎤 截至年底，现金及等价物加短期投资合计约800亿元，资产负债率维持在较低水平，DE Ratio资产负债率约0.35 。"
+    },
+    {
+      "timestamp": "23:27:48.131",
+      "category": "Conversation",
+      "text": "🔊 As of the end of the year, cash and cash equivalents plus short-term investments totaled approximately RMB 80 billion, and the debt-to-equity ratio remained at a low level, with a DE ratio of about 0.35."
+    },
+    {
+      "timestamp": "23:27:53.439",
+      "category": "Conversation",
+      "text": "🎤 展望2026年，公司将继续通过提升TakeRate佣金率和优化KAC获客成本来巩固盈利能力。"
+    },
+    {
+      "timestamp": "23:27:55.789",
+      "category": "Conversation",
+      "text": "🔊 Looking ahead to 2026, the company will continue to consolidate its profitability by increasing the Take Rate commission rate and optimizing the KAC customer acquisition cost."
+    },
+    {
+      "timestamp": "23:27:56.255",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:27:59.746",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:28:00.554",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:28:01.936",
+      "category": "Conversation",
+      "text": "🎤"
+    },
+    {
+      "timestamp": "23:28:06.556",
+      "category": "Conversation",
+      "text": "🎤 以上是本年度财报的核心要点，感谢各位的关注。各位投资者、各位分析师，大家好，下面由我曾行为大家简要回顾携程集团2025年度财务业绩。"
+    },
+    {
+      "timestamp": "23:28:10.222",
+      "category": "Conversation",
+      "text": "🔊 The above are the key points of this year's financial report. Thank you all for your attention. Dear investors and analysts, hello everyone. I, Zeng, will now briefly review Ctrip Group's financial performance for the year 2025."
+    }
+  ]
+}

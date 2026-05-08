@@ -1,0 +1,308 @@
+[
+  {
+    "model": "gpt-4o",
+    "run": 1,
+    "turns": 11,
+    "stats": {
+      "Turns": "11",
+      "Session": "80.5s",
+      "Cost": "$0.1147",
+      "Cost/sec": "$0.00143",
+      "Cost/Input": "$0.00233",
+      "Avg E2E Latency": "1.52s",
+      "P50 E2E Latency": "1.54s",
+      "P90 E2E Latency": "2.06s",
+      "Input Audio": "49.2s",
+      "Output Audio": "58.6s"
+    },
+    "perTurn": [
+      {
+        "turn": "1",
+        "duration": "3180ms",
+        "e2eLatency": "1847ms",
+        "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+        "outputTranslation": "I am very sorry that the hotel you stayed at did not meet your expectations.",
+        "inputAudioTokens": "38",
+        "cachedAudioTokens": "0",
+        "totalTokens": "148",
+        "cost": "$0.004538"
+      },
+      {
+        "turn": "2",
+        "duration": "2232ms",
+        "e2eLatency": "1376ms",
+        "inputASR": "我现在非常理解您现在的心情。",
+        "outputTranslation": "I completely understand how you are feeling right now.",
+        "inputAudioTokens": "64",
+        "cachedAudioTokens": "38",
+        "totalTokens": "149",
+        "cost": "$0.003710"
+      },
+      {
+        "turn": "3",
+        "duration": "2828ms",
+        "e2eLatency": "999ms",
+        "inputASR": "遇到这样的情况，确实很影响出行的心情。",
+        "outputTranslation": "Experiencing such a situation can indeed affect the mood of your trip.",
+        "inputAudioTokens": "97",
+        "cachedAudioTokens": "64",
+        "totalTokens": "228",
+        "cost": "$0.005730"
+      },
+      {
+        "turn": "4",
+        "duration": "4839ms",
+        "e2eLatency": "2061ms",
+        "inputASR": "请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。",
+        "outputTranslation": "Please rest assured, we will take your issue seriously and actively work to resolve it for you.",
+        "inputAudioTokens": "149",
+        "cachedAudioTokens": "97",
+        "totalTokens": "320",
+        "cost": "$0.007701"
+      },
+      {
+        "turn": "5",
+        "duration": "5075ms",
+        "e2eLatency": "1252ms",
+        "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+        "outputTranslation": "I have prepared several solutions for you, and you can choose based on your actual needs.",
+        "inputAudioTokens": "202",
+        "cachedAudioTokens": "149",
+        "totalTokens": "383",
+        "cost": "$0.008564"
+      },
+      {
+        "turn": "6",
+        "duration": "5913ms",
+        "e2eLatency": "1560ms",
+        "inputASR": "首先，我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境。",
+        "outputTranslation": "First, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay.",
+        "inputAudioTokens": "265",
+        "cachedAudioTokens": "202",
+        "totalTokens": "511",
+        "cost": "$0.011655"
+      },
+      {
+        "turn": "7",
+        "duration": "4883ms",
+        "e2eLatency": "1568ms",
+        "inputASR": "如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。",
+        "outputTranslation": "If you are already dissatisfied with this hotel, we can also coordinate to help you cancel the reservation free of charge.",
+        "inputAudioTokens": "317",
+        "cachedAudioTokens": "265",
+        "totalTokens": "579",
+        "cost": "$0.012638"
+      },
+      {
+        "turn": "8",
+        "duration": "6694ms",
+        "e2eLatency": "1541ms",
+        "inputASR": "我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。",
+        "outputTranslation": "We will recommend other hotels nearby of the same or higher class to ensure your trip is not affected.",
+        "inputAudioTokens": "389",
+        "cachedAudioTokens": "317",
+        "totalTokens": "674",
+        "cost": "$0.014240"
+      },
+      {
+        "turn": "9",
+        "duration": "6811ms",
+        "e2eLatency": "2620ms",
+        "inputASR": "最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。",
+        "outputTranslation": "The final option is that we request compensation from the hotel, such as applying for a discount on the room rate or upgrading your room type.",
+        "inputAudioTokens": "460",
+        "cachedAudioTokens": "389",
+        "totalTokens": "783",
+        "cost": "$0.016375"
+      },
+      {
+        "turn": "10",
+        "duration": "3740ms",
+        "e2eLatency": "760ms",
+        "inputASR": "请您考虑一下，看看哪个方案更符合您的需求。",
+        "outputTranslation": "Please take a moment to consider which option best suits your needs.",
+        "inputAudioTokens": "497",
+        "cachedAudioTokens": "460",
+        "totalTokens": "759",
+        "cost": "$0.014266"
+      },
+      {
+        "turn": "11",
+        "duration": "2993ms",
+        "e2eLatency": "1147ms",
+        "inputASR": "或者如果你有其他想法，也可以随时告诉我们。",
+        "outputTranslation": "Or if you have other ideas, feel free to let us know at any time.",
+        "inputAudioTokens": "532",
+        "cachedAudioTokens": "497",
+        "totalTokens": "814",
+        "cost": "$0.015313"
+      }
+    ],
+    "allASR": "非常抱歉，您入住的酒店没有达到您的预期。我现在非常理解您现在的心情。遇到这样的情况，确实很影响出行的心情。请您放心，我们一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店帮您更换房间，确保您能有一个更舒适的入住环境。如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。请您考虑一下，看看哪个方案更符合您的需求。或者如果你有其他想法，也可以随时告诉我们。",
+    "allTranslation": "I am very sorry that the hotel you stayed at did not meet your expectations. I completely understand how you are feeling right now. Experiencing such a situation can indeed affect the mood of your trip. Please rest assured, we will take your issue seriously and actively work to resolve it for you. I have prepared several solutions for you, and you can choose based on your actual needs. First, we can immediately contact the hotel to help you change rooms, ensuring you have a more comfortable stay. If you are already dissatisfied with this hotel, we can also coordinate to help you cancel the reservation free of charge. We will recommend other hotels nearby of the same or higher class to ensure your trip is not affected. The final option is that we request compensation from the hotel, such as applying for a discount on the room rate or upgrading your room type. Please take a moment to consider which option best suits your needs. Or if you have other ideas, feel free to let us know at any time."
+  },
+  {
+    "model": "gpt-4o",
+    "run": 2,
+    "turns": 13,
+    "stats": {
+      "Turns": "13",
+      "Session": "80.1s",
+      "Cost": "$0.2229",
+      "Cost/sec": "$0.00278",
+      "Cost/Input": "$0.00434",
+      "Avg E2E Latency": "1.37s",
+      "P50 E2E Latency": "1.35s",
+      "P90 E2E Latency": "2.04s",
+      "Input Audio": "51.3s",
+      "Output Audio": "64.8s"
+    },
+    "perTurn": [
+      {
+        "turn": "1",
+        "duration": "3073ms",
+        "e2eLatency": "1131ms",
+        "inputASR": "非常抱歉，您入住的酒店没有达到您的预期。",
+        "outputTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations.",
+        "inputAudioTokens": "61",
+        "cachedAudioTokens": "0",
+        "totalTokens": "170",
+        "cost": "$0.004907"
+      },
+      {
+        "turn": "2",
+        "duration": "2265ms",
+        "e2eLatency": "712ms",
+        "inputASR": "我现在非常理解您现在的心情。",
+        "outputTranslation": "I completely understand how you feel right now.",
+        "inputAudioTokens": "200",
+        "cachedAudioTokens": "154",
+        "totalTokens": "279",
+        "cost": "$0.006146"
+      },
+      {
+        "turn": "3",
+        "duration": "2781ms",
+        "e2eLatency": "1363ms",
+        "inputASR": "遇到这样的情况，确实很影响出行的心情。",
+        "outputTranslation": "Encountering such a situation indeed greatly affects the mood of your trip.",
+        "inputAudioTokens": "166",
+        "cachedAudioTokens": "107",
+        "totalTokens": "308",
+        "cost": "$0.007504"
+      },
+      {
+        "turn": "4",
+        "duration": "4619ms",
+        "e2eLatency": "1668ms",
+        "inputASR": "请您放心，我们一定一定会认真对待您的问题，积极为您解决这个问题的。",
+        "outputTranslation": "Please rest assured, we will definitely take your issue seriously and actively work to resolve it for you.",
+        "inputAudioTokens": "489",
+        "cachedAudioTokens": "391",
+        "totalTokens": "675",
+        "cost": "$0.014921"
+      },
+      {
+        "turn": "5",
+        "duration": "4625ms",
+        "e2eLatency": "2604ms",
+        "inputASR": "目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。",
+        "outputTranslation": "Currently, I have prepared several solutions for you, and you can choose based on your actual needs.",
+        "inputAudioTokens": "358",
+        "cachedAudioTokens": "264",
+        "totalTokens": "550",
+        "cost": "$0.011962"
+      },
+      {
+        "turn": "6",
+        "duration": "2975ms",
+        "e2eLatency": "1009ms",
+        "inputASR": "首先，我们可以立即联系酒店，帮您更换房间。",
+        "outputTranslation": "First, we can contact the hotel immediately to assist you in changing rooms.",
+        "inputAudioTokens": "418",
+        "cachedAudioTokens": "358",
+        "totalTokens": "618",
+        "cost": "$0.013029"
+      },
+      {
+        "turn": "7",
+        "duration": "2518ms",
+        "e2eLatency": "1108ms",
+        "inputASR": "确保您能有一个更舒适的入住环境。",
+        "outputTranslation": "Ensuring that you have a more comfortable stay.",
+        "inputAudioTokens": "472",
+        "cachedAudioTokens": "418",
+        "totalTokens": "632",
+        "cost": "$0.012240"
+      },
+      {
+        "turn": "8",
+        "duration": "4629ms",
+        "e2eLatency": "1350ms",
+        "inputASR": "如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。",
+        "outputTranslation": "If you are already dissatisfied with this hotel, we can also assist in coordinating the free cancellation of your booking.",
+        "inputAudioTokens": "567",
+        "cachedAudioTokens": "472",
+        "totalTokens": "830",
+        "cost": "$0.017441"
+      },
+      {
+        "turn": "9",
+        "duration": "6614ms",
+        "e2eLatency": "1493ms",
+        "inputASR": "我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。",
+        "outputTranslation": "We will recommend nearby hotels of the same grade or higher to ensure your trip is not affected.",
+        "inputAudioTokens": "702",
+        "cachedAudioTokens": "567",
+        "totalTokens": "965",
+        "cost": "$0.019358"
+      },
+      {
+        "turn": "10",
+        "duration": "6658ms",
+        "e2eLatency": "2038ms",
+        "inputASR": "最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。",
+        "outputTranslation": "The final option is for us to request compensation from the hotel, such as applying for a discount on the room rate or upgrading your room type.",
+        "inputAudioTokens": "837",
+        "cachedAudioTokens": "702",
+        "totalTokens": "1163",
+        "cost": "$0.023702"
+      },
+      {
+        "turn": "11",
+        "duration": "3654ms",
+        "e2eLatency": "579ms",
+        "inputASR": "请您考虑一下，看看哪个方案更符合您的需求。",
+        "outputTranslation": "Please take a moment to consider which option best meets your needs.",
+        "inputAudioTokens": "905",
+        "cachedAudioTokens": "837",
+        "totalTokens": "1172",
+        "cost": "$0.022353"
+      },
+      {
+        "turn": "12",
+        "duration": "2965ms",
+        "e2eLatency": "1036ms",
+        "inputASR": "或者，如果你有其他想法，也可以随时告诉我们。",
+        "outputTranslation": "Alternatively, if you have other ideas, feel free to let us know anytime.",
+        "inputAudioTokens": "966",
+        "cachedAudioTokens": "905",
+        "totalTokens": "1258",
+        "cost": "$0.024136"
+      },
+      {
+        "turn": "13",
+        "duration": "3957ms",
+        "e2eLatency": "1720ms",
+        "inputASR": "我们会一直为您跟进，直到问题圆满解决。",
+        "outputTranslation": "We will continue to follow up until the issue is fully resolved.",
+        "inputAudioTokens": "2046",
+        "cachedAudioTokens": "1968",
+        "totalTokens": "2343",
+        "cost": "$0.045173"
+      }
+    ],
+    "allASR": "非常抱歉，您入住的酒店没有达到您的预期。我现在非常理解您现在的心情。遇到这样的情况，确实很影响出行的心情。请您放心，我们一定一定会认真对待您的问题，积极为您解决这个问题的。目前我为您准备了几个处理方案，您可以根据自己的实际需求选择。首先，我们可以立即联系酒店，帮您更换房间。确保您能有一个更舒适的入住环境。如果您对这家酒店已经不满意，我们也可以协调帮您免费取消订单。我们会为您推荐附近同等级或者更高档次的其他酒店，确保您的行程不会受到影响。最后一个方案是我们向酒店方面提出补偿要求，比如申请房费减免或升级您的房型。请您考虑一下，看看哪个方案更符合您的需求。或者，如果你有其他想法，也可以随时告诉我们。我们会一直为您跟进，直到问题圆满解决。",
+    "allTranslation": "We are very sorry that the hotel you stayed at did not meet your expectations. I completely understand how you feel right now. Encountering such a situation indeed greatly affects the mood of your trip. Please rest assured, we will definitely take your issue seriously and actively work to resolve it for you. Currently, I have prepared several solutions for you, and you can choose based on your actual needs. First, we can contact the hotel immediately to assist you in changing rooms. Ensuring that you have a more comfortable stay. If you are already dissatisfied with this hotel, we can also assist in coordinating the free cancellation of your booking. We will recommend nearby hotels of the same grade or higher to ensure your trip is not affected. The final option is for us to request compensation from the hotel, such as applying for a discount on the room rate or upgrading your room type. Please take a moment to consider which option best meets your needs. Alternatively, if you have other ideas, feel free to let us know anytime. We will continue to follow up until the issue is fully resolved."
+  }
+]
