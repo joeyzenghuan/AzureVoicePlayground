@@ -157,6 +157,36 @@ const playgroundModes: { mode: PlaygroundMode; label: string; icon: React.ReactN
       </svg>
     ),
   },
+  {
+    mode: 'gpt-realtime',
+    label: 'GPT Realtime',
+    category: 'agent',
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    mode: 'gpt-realtime-whisper',
+    label: 'GPT Realtime Whisper',
+    category: 'agent',
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+      </svg>
+    ),
+  },
+  {
+    mode: 'gpt-realtime-translate',
+    label: 'GPT Realtime Translate',
+    category: 'agent',
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+      </svg>
+    ),
+  },
 ];
 
 export function NavigationSidebar({
@@ -170,7 +200,7 @@ export function NavigationSidebar({
   const [showSecurityNotice, setShowSecurityNotice] = useState(false);
 
   // Determine if current mode is a Voice Agent mode (has its own config panel)
-  const isAgentMode = activeMode === 'voice-live-chat' || activeMode === 'voice-live-translator' || activeMode === 'gemini-live';
+  const isAgentMode = activeMode === 'voice-live-chat' || activeMode === 'voice-live-translator' || activeMode === 'gemini-live' || activeMode === 'gpt-realtime' || activeMode === 'gpt-realtime-whisper' || activeMode === 'gpt-realtime-translate';
 
   return (
     <div

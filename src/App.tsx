@@ -17,6 +17,9 @@ import { VoiceCreationPlayground } from './components/VoiceCreationPlayground';
 import { VideoTranslationPlayground } from './components/VideoTranslationPlayground';
 import { PodcastAgentPlayground } from './components/PodcastAgentPlayground';
 import { GeminiLivePlayground } from './components/GeminiLivePlayground';
+import { GptRealtimePlayground } from './components/GptRealtimePlayground';
+import { GptRealtimeWhisperPlayground } from './components/GptRealtimeWhisperPlayground';
+import { GptRealtimeTranslatePlayground } from './components/GptRealtimeTranslatePlayground';
 
 // Valid playground modes for URL hash routing
 const VALID_MODES: PlaygroundMode[] = [
@@ -30,6 +33,9 @@ const VALID_MODES: PlaygroundMode[] = [
   'voice-live-translator',
   'podcast-agent',
   'gemini-live',
+  'gpt-realtime',
+  'gpt-realtime-whisper',
+  'gpt-realtime-translate',
 ];
 
 // Get initial playground mode from URL hash
@@ -163,6 +169,27 @@ function App() {
         );
       case 'gemini-live':
         return <GeminiLivePlayground />;
+      case 'gpt-realtime':
+        return (
+          <GptRealtimePlayground
+            endpoint={settings.voiceLiveEndpoint || ''}
+            apiKey={settings.voiceLiveApiKey || ''}
+          />
+        );
+      case 'gpt-realtime-whisper':
+        return (
+          <GptRealtimeWhisperPlayground
+            endpoint={settings.voiceLiveEndpoint || ''}
+            apiKey={settings.voiceLiveApiKey || ''}
+          />
+        );
+      case 'gpt-realtime-translate':
+        return (
+          <GptRealtimeTranslatePlayground
+            endpoint={settings.voiceLiveEndpoint || ''}
+            apiKey={settings.voiceLiveApiKey || ''}
+          />
+        );
       default:
         return null;
     }
