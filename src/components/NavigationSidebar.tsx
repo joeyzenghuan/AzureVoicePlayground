@@ -250,7 +250,7 @@ export function NavigationSidebar({
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 {icon}
-                {!isCollapsed && <span>{label}</span>}
+                {!isCollapsed && <span className="whitespace-nowrap truncate">{label}</span>}
               </button>
               {!isCollapsed && (
                 <a
@@ -291,7 +291,7 @@ export function NavigationSidebar({
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 {icon}
-                {!isCollapsed && <span>{label}</span>}
+                {!isCollapsed && <span className="whitespace-nowrap truncate">{label}</span>}
               </button>
               {!isCollapsed && (
                 <a
