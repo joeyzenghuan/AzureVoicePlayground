@@ -9,6 +9,7 @@ export interface TranslateClientConfig {
   deployment: string;
   targetLanguage: string;         // e.g. "en", "zh", "ja"
   enableSourceTranscript: boolean; // Whether to also transcribe the source audio
+  textOnlyMode: boolean;           // Text output only, no audio output
   onOutputAudioData: (audioData: ArrayBuffer) => void;
   onOutputTranscriptDelta: (delta: string) => void;
   onInputTranscriptDelta: (delta: string) => void;
@@ -84,15 +85,20 @@ export class TranslateRealtimeClient {
       };
     }
 
-    const sessionConfig = {
+    const sessionConfig: Record<string, unknown> = {
       type: 'session.update',
       session: {
         audio,
       },
     };
 
+    // Add modalities for text-only mode
+    if (this.config.textOnlyMode) {
+      (sessionConfig.session as Record<string, unknown>).modalities = ['text'];
+    }
+
     this.ws.send(JSON.stringify(sessionConfig));
-    console.log('[Translate Realtime] Session update sent');
+    console.log('[Translate Realtime] Session update sent', { textOnlyMode: this.config.textOnlyMode });
   }
 
   private handleServerEvent(event: Record<string, unknown>): void {
