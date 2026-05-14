@@ -58,9 +58,6 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
   const [enableSourceTranscript, setEnableSourceTranscript] = useState(
     () => localStorage.getItem('gpt-translate-source-transcript') !== 'false',
   );
-  const [textOnlyMode, setTextOnlyMode] = useState(
-    () => localStorage.getItem('gpt-translate-text-only') === 'true',
-  );
 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [isRecording, setIsRecording] = useState(false);
@@ -89,9 +86,6 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
   useEffect(() => {
     localStorage.setItem('gpt-translate-source-transcript', enableSourceTranscript.toString());
   }, [enableSourceTranscript]);
-  useEffect(() => {
-    localStorage.setItem('gpt-translate-text-only', textOnlyMode.toString());
-  }, [textOnlyMode]);
 
   // Auto-scroll
   useEffect(() => {
@@ -138,7 +132,6 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
       deployment: deployment.trim(),
       targetLanguage,
       enableSourceTranscript,
-      textOnlyMode,
       onOutputAudioData: (audioData) => {
         audioHandler.playAudio(audioData);
       },
@@ -449,23 +442,6 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
             </label>
             <p className="text-xs text-gray-500 ml-6">
               Also transcribe the original speech for side-by-side view
-            </p>
-          </div>
-
-          {/* Text Only Mode */}
-          <div className="border-t border-gray-200 pt-4">
-            <label className="flex items-center gap-2 mb-2">
-              <input
-                type="checkbox"
-                checked={textOnlyMode}
-                onChange={(e) => setTextOnlyMode(e.target.checked)}
-                disabled={status === 'connected'}
-                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-sm font-medium text-gray-700">Text Output Only</span>
-            </label>
-            <p className="text-xs text-gray-500 ml-6">
-              Return only text, no translated audio (lower latency & bandwidth)
             </p>
           </div>
 
