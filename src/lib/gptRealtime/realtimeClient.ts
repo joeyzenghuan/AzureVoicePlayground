@@ -6,6 +6,19 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 export type RealtimeSessionPatch = Record<string, unknown>;
 export type RealtimeResponsePatch = Record<string, unknown>;
 
+export interface RealtimeOutputEventMeta {
+  responseId: string | null;
+  outputIndex: number | null;
+  itemId: string | null;
+  contentIndex: number | null;
+}
+
+export interface RealtimeResponseOutputSummary {
+  outputIndex: number;
+  itemId: string | null;
+  phase: string | null;
+}
+
 export interface GptRealtimeClientConfig {
   apiKey: string;
   endpoint: string;
@@ -13,10 +26,11 @@ export interface GptRealtimeClientConfig {
   isAzure: boolean;
   session: RealtimeSessionPatch;
   response?: RealtimeResponsePatch;
-  onAudioData: (audioData: ArrayBuffer) => void;
-  onOutputTranscript: (text: string, isDelta: boolean) => void;
+  onAudioData: (audioData: ArrayBuffer, meta: RealtimeOutputEventMeta) => void;
+  onOutputText: (text: string, isDelta: boolean, meta: RealtimeOutputEventMeta) => void;
+  onOutputAudioTranscript: (text: string, isDelta: boolean, meta: RealtimeOutputEventMeta) => void;
   onInputTranscript: (text: string, isDelta: boolean) => void;
-  onTurnComplete: () => void;
+  onTurnComplete: (outputs: RealtimeResponseOutputSummary[]) => void;
   onInterrupted: () => void;
   onUserSpeechStarted?: () => void;
   onError: (error: string) => void;
@@ -68,7 +82,6 @@ export class GptRealtimeClient {
   private currentResponseId: string | null = null;
   private currentAssistantItemId: string | null = null;
   private currentAssistantContentIndex = 0;
-  private hasAudioTranscriptForCurrentResponse = false;
 
   constructor(config: GptRealtimeClientConfig) {
     this.config = config;
@@ -112,7 +125,6 @@ export class GptRealtimeClient {
         this.currentResponseId = null;
         this.currentAssistantItemId = null;
         this.currentAssistantContentIndex = 0;
-        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onStatusChange('disconnected');
       };
     } catch (error) {
@@ -171,6 +183,23 @@ export class GptRealtimeClient {
     }
   }
 
+  private getOutputEventMeta(event: RealtimeServerEvent): RealtimeOutputEventMeta {
+    const responseId =
+      typeof event.response_id === 'string' ? event.response_id : this.currentResponseId;
+    const outputIndex =
+      typeof event.output_index === 'number' ? event.output_index : null;
+    const itemId = typeof event.item_id === 'string' ? event.item_id : null;
+    const contentIndex =
+      typeof event.content_index === 'number' ? event.content_index : null;
+
+    return {
+      responseId,
+      outputIndex,
+      itemId,
+      contentIndex,
+    };
+  }
+
   private handleServerEvent(event: RealtimeServerEvent): void {
     const type = event.type as string;
 
@@ -199,7 +228,6 @@ export class GptRealtimeClient {
         } else {
           this.currentResponseId = null;
         }
-        this.hasAudioTranscriptForCurrentResponse = false;
         break;
       }
 
@@ -241,7 +269,7 @@ export class GptRealtimeClient {
             this.config.onLatencyMeasured?.(latency);
           }
 
-          this.config.onAudioData(decodeBase64ToArrayBuffer(delta));
+          this.config.onAudioData(decodeBase64ToArrayBuffer(delta), this.getOutputEventMeta(event));
         }
         break;
       }
@@ -251,8 +279,7 @@ export class GptRealtimeClient {
         this.captureAssistantLocation(event);
         const delta = event.delta;
         if (typeof delta === 'string' && delta) {
-          this.hasAudioTranscriptForCurrentResponse = true;
-          this.config.onOutputTranscript(delta, true);
+          this.config.onOutputAudioTranscript(delta, true, this.getOutputEventMeta(event));
         }
         break;
       }
@@ -262,8 +289,7 @@ export class GptRealtimeClient {
         this.captureAssistantLocation(event);
         const transcript = event.transcript;
         if (typeof transcript === 'string' && transcript) {
-          this.hasAudioTranscriptForCurrentResponse = true;
-          this.config.onOutputTranscript(transcript, false);
+          this.config.onOutputAudioTranscript(transcript, false, this.getOutputEventMeta(event));
         }
         break;
       }
@@ -271,8 +297,8 @@ export class GptRealtimeClient {
       case 'response.output_text.delta':
       case 'response.text.delta': {
         const delta = event.delta;
-        if (!this.hasAudioTranscriptForCurrentResponse && typeof delta === 'string' && delta) {
-          this.config.onOutputTranscript(delta, true);
+        if (typeof delta === 'string' && delta) {
+          this.config.onOutputText(delta, true, this.getOutputEventMeta(event));
         }
         break;
       }
@@ -280,8 +306,8 @@ export class GptRealtimeClient {
       case 'response.output_text.done':
       case 'response.text.done': {
         const text = event.text;
-        if (!this.hasAudioTranscriptForCurrentResponse && typeof text === 'string' && text) {
-          this.config.onOutputTranscript(text, false);
+        if (typeof text === 'string' && text) {
+          this.config.onOutputText(text, false, this.getOutputEventMeta(event));
         }
         break;
       }
@@ -291,21 +317,34 @@ export class GptRealtimeClient {
         this.currentResponseId = null;
         this.currentAssistantItemId = null;
         this.currentAssistantContentIndex = 0;
-        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onInterrupted();
         break;
 
-      case 'response.done':
+      case 'response.done': {
         console.log('[GPT Realtime] Response complete');
+        const outputs: RealtimeResponseOutputSummary[] = [];
+        const response = event.response;
+        if (isPlainObject(response) && Array.isArray(response.output)) {
+          response.output.forEach((output, index) => {
+            if (!isPlainObject(output)) {
+              return;
+            }
+
+            outputs.push({
+              outputIndex: index,
+              itemId: typeof output.id === 'string' ? output.id : null,
+              phase: typeof output.phase === 'string' ? output.phase : null,
+            });
+          });
+        }
         this.currentResponseId = null;
-        this.hasAudioTranscriptForCurrentResponse = false;
-        this.config.onTurnComplete();
+        this.config.onTurnComplete(outputs);
         break;
+      }
 
       case 'response.cancelled':
         console.log('[GPT Realtime] Response cancelled');
         this.currentResponseId = null;
-        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onInterrupted();
         this.userSpeechEndTime = null;
         this.firstAudioReceived = false;
@@ -384,6 +423,10 @@ export class GptRealtimeClient {
         }),
       );
     }
+  }
+
+  isResponseInProgress(): boolean {
+    return this.currentResponseId != null;
   }
 
   disconnect(): void {

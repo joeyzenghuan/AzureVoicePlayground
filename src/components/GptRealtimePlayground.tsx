@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   GptRealtimeClient,
   type ConnectionStatus,
+  type RealtimeOutputEventMeta,
   type RealtimeResponsePatch,
+  type RealtimeResponseOutputSummary,
   type RealtimeSessionPatch,
 } from '../lib/gptRealtime/realtimeClient';
 import { GptRealtimeAudioHandler } from '../lib/gptRealtime/audioHandler';
@@ -12,17 +14,37 @@ interface Message {
   type: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
+  label?: string;
 }
 
 type TurnDetectionMode = 'server_vad' | 'semantic_vad' | 'off';
 type NoiseReductionMode = 'off' | 'near_field' | 'far_field';
 type ReasoningEffort = 'off' | 'minimal' | 'low' | 'medium' | 'high';
+type AssistantSegmentMode =
+  | 'all'
+  | 'final_transcript_only'
+  | 'all_transcripts_final_audio'
+  | 'final_segment_only';
+
+interface AssistantSegmentState {
+  outputIndex: number;
+  itemId: string | null;
+  phase: string | null;
+  outputTextDelta: string;
+  outputTextDone: string | null;
+  outputAudioTranscriptDelta: string;
+  outputAudioTranscriptDone: string | null;
+  audioChunks: ArrayBuffer[];
+  outputTextDeltaMessageId: string | null;
+  outputAudioTranscriptDeltaMessageId: string | null;
+}
 
 interface GptRealtimeUiConfig {
   deploymentOrModel: string;
   voice: string;
   systemPrompt: string;
   showResponseLatency: boolean;
+  assistantSegmentMode: AssistantSegmentMode;
   outputModalities: Array<'audio' | 'text'>;
   transcriptionEnabled: boolean;
   transcriptionModel: string;
@@ -66,6 +88,7 @@ const DEFAULT_CONFIG: GptRealtimeUiConfig = {
   voice: 'alloy',
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   showResponseLatency: false,
+  assistantSegmentMode: 'all',
   outputModalities: ['audio'],
   transcriptionEnabled: true,
   transcriptionModel: 'whisper-1',
@@ -306,14 +329,17 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
 
   const transcriptRef = useRef<{
     inputTranscript: string;
-    outputTranscript: string;
     inputMessageId: string | null;
-    outputMessageId: string | null;
   }>({
     inputTranscript: '',
-    outputTranscript: '',
     inputMessageId: null,
-    outputMessageId: null,
+  });
+  const assistantSegmentsRef = useRef<{
+    responseId: string | null;
+    segments: Map<number, AssistantSegmentState>;
+  }>({
+    responseId: null,
+    segments: new Map(),
   });
 
   useEffect(() => {
@@ -340,13 +366,178 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
     setMessages((prev) => prev.map((message) => (message.id === id ? { ...message, content } : message)));
   }, []);
 
-  function resetTranscriptState() {
+  function resetInputTranscriptState() {
     transcriptRef.current = {
       inputTranscript: '',
-      outputTranscript: '',
       inputMessageId: null,
-      outputMessageId: null,
     };
+  }
+
+  function resetAssistantSegments() {
+    assistantSegmentsRef.current = {
+      responseId: null,
+      segments: new Map(),
+    };
+  }
+
+  function resetTurnState() {
+    resetInputTranscriptState();
+    resetAssistantSegments();
+  }
+
+  function appendStreamingTranscriptMessage(
+    key: 'inputTranscript',
+    messageIdKey: 'inputMessageId',
+    delta: string,
+    messageType: Message['type'],
+    label?: string,
+  ) {
+    const transcript = transcriptRef.current;
+    transcript[key] = `${transcript[key]}${delta}`;
+
+    const messageId = transcript[messageIdKey];
+    if (messageId) {
+      updateMessage(messageId, transcript[key]);
+      return;
+    }
+
+    const newId = crypto.randomUUID();
+    transcript[messageIdKey] = newId;
+    addMessage({
+      id: newId,
+      type: messageType,
+      content: transcript[key],
+      timestamp: new Date(),
+      label,
+    });
+  }
+
+  function addCompletedTranscriptMessage(text: string, messageType: Message['type'], label?: string) {
+    addMessage({
+      id: crypto.randomUUID(),
+      type: messageType,
+      content: text,
+      timestamp: new Date(),
+      label,
+    });
+  }
+
+  function createAssistantSegment(outputIndex: number): AssistantSegmentState {
+    return {
+      outputIndex,
+      itemId: null,
+      phase: null,
+      outputTextDelta: '',
+      outputTextDone: null,
+      outputAudioTranscriptDelta: '',
+      outputAudioTranscriptDone: null,
+      audioChunks: [],
+      outputTextDeltaMessageId: null,
+      outputAudioTranscriptDeltaMessageId: null,
+    };
+  }
+
+  function ensureAssistantSegment(meta: RealtimeOutputEventMeta): AssistantSegmentState {
+    const responseId = meta.responseId ?? assistantSegmentsRef.current.responseId ?? 'pending-response';
+
+    if (assistantSegmentsRef.current.responseId !== responseId) {
+      assistantSegmentsRef.current = {
+        responseId,
+        segments: new Map(),
+      };
+    }
+
+    const outputIndex = meta.outputIndex ?? 0;
+    let segment = assistantSegmentsRef.current.segments.get(outputIndex);
+    if (!segment) {
+      segment = createAssistantSegment(outputIndex);
+      assistantSegmentsRef.current.segments.set(outputIndex, segment);
+    }
+
+    if (meta.itemId) {
+      segment.itemId = meta.itemId;
+    }
+
+    return segment;
+  }
+
+  function upsertAssistantDeltaMessage(
+    segment: AssistantSegmentState,
+    key: 'outputTextDelta' | 'outputAudioTranscriptDelta',
+    messageIdKey: 'outputTextDeltaMessageId' | 'outputAudioTranscriptDeltaMessageId',
+    delta: string,
+    label: string,
+  ) {
+    segment[key] = `${segment[key]}${delta}`;
+
+    const messageId = segment[messageIdKey];
+    if (messageId) {
+      updateMessage(messageId, segment[key]);
+      return;
+    }
+
+    const newId = crypto.randomUUID();
+    segment[messageIdKey] = newId;
+    addMessage({
+      id: newId,
+      type: 'assistant',
+      content: segment[key],
+      timestamp: new Date(),
+      label: `${label} · Segment ${segment.outputIndex + 1}`,
+    });
+  }
+
+  function addAssistantDoneMessage(segment: AssistantSegmentState, text: string, label: string) {
+    addCompletedTranscriptMessage(text, 'assistant', `${label} · Segment ${segment.outputIndex + 1}`);
+  }
+
+  function syncSegmentPhases(outputs: RealtimeResponseOutputSummary[]) {
+    outputs.forEach((output) => {
+      const segment =
+        assistantSegmentsRef.current.segments.get(output.outputIndex) ??
+        createAssistantSegment(output.outputIndex);
+      segment.phase = output.phase;
+      if (output.itemId) {
+        segment.itemId = output.itemId;
+      }
+      assistantSegmentsRef.current.segments.set(output.outputIndex, segment);
+    });
+  }
+
+  function pickFinalSegment(outputs: RealtimeResponseOutputSummary[]): AssistantSegmentState | null {
+    const byOutputIndex = assistantSegmentsRef.current.segments;
+    if (outputs.length > 0) {
+      const preferredOutput =
+        outputs.find((output) => output.phase === 'final_answer') ??
+        [...outputs].sort((a, b) => b.outputIndex - a.outputIndex)[0];
+      return byOutputIndex.get(preferredOutput.outputIndex) ?? null;
+    }
+
+    const segments = [...byOutputIndex.values()].sort((a, b) => b.outputIndex - a.outputIndex);
+    return segments[0] ?? null;
+  }
+
+  function renderFinalSegment(segment: AssistantSegmentState) {
+    if (segment.outputTextDelta) {
+      addCompletedTranscriptMessage(segment.outputTextDelta, 'assistant', 'Model Text Delta · Final Segment');
+    }
+    if (segment.outputTextDone) {
+      addCompletedTranscriptMessage(segment.outputTextDone, 'assistant', 'Model Text Done · Final Segment');
+    }
+    if (segment.outputAudioTranscriptDelta) {
+      addCompletedTranscriptMessage(
+        segment.outputAudioTranscriptDelta,
+        'assistant',
+        'Audio Transcript Delta · Final Segment',
+      );
+    }
+    if (segment.outputAudioTranscriptDone) {
+      addCompletedTranscriptMessage(
+        segment.outputAudioTranscriptDone,
+        'assistant',
+        'Audio Transcript Done · Final Segment',
+      );
+    }
   }
 
   async function handleConnect() {
@@ -371,7 +562,7 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
 
     clientRef.current?.disconnect();
     audioHandlerRef.current?.destroy();
-    resetTranscriptState();
+    resetTurnState();
 
     const audioHandler = new GptRealtimeAudioHandler();
     audioHandlerRef.current = audioHandler;
@@ -386,50 +577,139 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
       isAzure: true,
       session,
       response,
-      onAudioData: (audioData) => {
-        audioHandler.playAudio(audioData);
+      onAudioData: (audioData, meta) => {
+        const segment = ensureAssistantSegment(meta);
+        segment.audioChunks.push(audioData);
+
+        if (
+          config.assistantSegmentMode === 'all' ||
+          config.assistantSegmentMode === 'final_transcript_only'
+        ) {
+          audioHandler.playAudio(audioData);
+        }
       },
-      onOutputTranscript: (text, isDelta) => {
+      onOutputText: (text, isDelta, meta) => {
         const transcript = transcriptRef.current;
+        const segment = ensureAssistantSegment(meta);
 
         if (transcript.inputTranscript) {
           transcript.inputTranscript = '';
           transcript.inputMessageId = null;
         }
 
-        transcript.outputTranscript = isDelta ? `${transcript.outputTranscript}${text}` : text;
+        if (isDelta) {
+          if (
+            config.assistantSegmentMode === 'all' ||
+            config.assistantSegmentMode === 'all_transcripts_final_audio'
+          ) {
+            upsertAssistantDeltaMessage(
+              segment,
+              'outputTextDelta',
+              'outputTextDeltaMessageId',
+              text,
+              'Model Text Delta',
+            );
+          } else {
+            segment.outputTextDelta = `${segment.outputTextDelta}${text}`;
+          }
+          return;
+        }
 
-        if (transcript.outputMessageId) {
-          updateMessage(transcript.outputMessageId, transcript.outputTranscript);
-        } else {
-          const newId = crypto.randomUUID();
-          transcript.outputMessageId = newId;
-          addMessage({
-            id: newId,
-            type: 'assistant',
-            content: transcript.outputTranscript,
-            timestamp: new Date(),
-          });
+        segment.outputTextDone = text;
+        if (
+          config.assistantSegmentMode === 'all' ||
+          config.assistantSegmentMode === 'all_transcripts_final_audio'
+        ) {
+          addAssistantDoneMessage(segment, text, 'Model Text Done');
+        }
+      },
+      onOutputAudioTranscript: (text, isDelta, meta) => {
+        const transcript = transcriptRef.current;
+        const segment = ensureAssistantSegment(meta);
+
+        if (transcript.inputTranscript) {
+          transcript.inputTranscript = '';
+          transcript.inputMessageId = null;
+        }
+
+        if (isDelta) {
+          if (
+            config.assistantSegmentMode === 'all' ||
+            config.assistantSegmentMode === 'all_transcripts_final_audio'
+          ) {
+            upsertAssistantDeltaMessage(
+              segment,
+              'outputAudioTranscriptDelta',
+              'outputAudioTranscriptDeltaMessageId',
+              text,
+              'Audio Transcript Delta',
+            );
+          } else {
+            segment.outputAudioTranscriptDelta = `${segment.outputAudioTranscriptDelta}${text}`;
+          }
+          return;
+        }
+
+        segment.outputAudioTranscriptDone = text;
+        if (
+          config.assistantSegmentMode === 'all' ||
+          config.assistantSegmentMode === 'all_transcripts_final_audio'
+        ) {
+          addAssistantDoneMessage(segment, text, 'Audio Transcript Done');
         }
       },
       onInputTranscript: (text, isDelta) => {
         const transcript = transcriptRef.current;
-        transcript.inputTranscript = isDelta ? `${transcript.inputTranscript}${text}` : text;
+
+        if (isDelta) {
+          appendStreamingTranscriptMessage('inputTranscript', 'inputMessageId', text, 'user');
+          return;
+        }
+
+        transcript.inputTranscript = text;
 
         if (transcript.inputMessageId) {
           updateMessage(transcript.inputMessageId, transcript.inputTranscript);
-        } else {
-          const newId = crypto.randomUUID();
-          transcript.inputMessageId = newId;
-          addMessage({
-            id: newId,
-            type: 'user',
-            content: transcript.inputTranscript,
-            timestamp: new Date(),
-          });
+          return;
         }
+
+        const newId = crypto.randomUUID();
+        transcript.inputMessageId = newId;
+        addMessage({
+          id: newId,
+          type: 'user',
+          content: transcript.inputTranscript,
+          timestamp: new Date(),
+        });
       },
-      onTurnComplete: () => {
+      onTurnComplete: (outputs) => {
+        syncSegmentPhases(outputs);
+
+        if (
+          config.assistantSegmentMode === 'final_transcript_only' ||
+          config.assistantSegmentMode === 'final_segment_only'
+        ) {
+          const finalSegment = pickFinalSegment(outputs);
+          if (finalSegment) {
+            renderFinalSegment(finalSegment);
+
+            if (config.assistantSegmentMode === 'final_segment_only') {
+              finalSegment.audioChunks.forEach((chunk) => {
+                audioHandler.playAudio(chunk);
+              });
+            }
+          }
+        }
+
+        if (config.assistantSegmentMode === 'all_transcripts_final_audio') {
+          const finalSegment = pickFinalSegment(outputs);
+          if (finalSegment) {
+            finalSegment.audioChunks.forEach((chunk) => {
+              audioHandler.playAudio(chunk);
+            });
+          }
+        }
+
         if (showResponseLatencyRef.current && latencyRef.current != null) {
           addMessage({
             id: crypto.randomUUID(),
@@ -438,12 +718,11 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
             timestamp: new Date(),
           });
         }
-        resetTranscriptState();
+        resetTurnState();
       },
       onInterrupted: () => {
         audioHandler.clearPlayback();
-        transcriptRef.current.outputTranscript = '';
-        transcriptRef.current.outputMessageId = null;
+        resetTurnState();
         addMessage({
           id: crypto.randomUUID(),
           type: 'system',
@@ -463,13 +742,16 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
         }
 
         const playedMs = audio.interruptPlayback();
+        if (!realtimeClient.isResponseInProgress()) {
+          return;
+        }
         realtimeClient.interruptResponse(playedMs);
       },
       onError: (clientError) => setError(clientError),
       onStatusChange: (nextStatus) => {
         setStatus(nextStatus);
         if (nextStatus === 'disconnected') {
-          resetTranscriptState();
+          resetTurnState();
           setLatency(null);
           latencyRef.current = null;
         }
@@ -536,7 +818,7 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
   }
 
   function handleClearMessages() {
-    resetTranscriptState();
+    resetTurnState();
     setMessages([]);
   }
 
@@ -641,6 +923,7 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
             <>
               {messages.map((msg) => (
                 <div key={msg.id} className={`max-w-[80%] px-4 py-2 rounded-lg ${getMessageStyle(msg.type)}`}>
+                  {msg.label && <p className="text-[11px] uppercase tracking-wide opacity-60 mb-1">{msg.label}</p>}
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   <p className="text-xs opacity-60 mt-1">{msg.timestamp.toLocaleTimeString()}</p>
                 </div>
@@ -784,6 +1067,32 @@ export function GptRealtimePlayground({ endpoint, apiKey }: GptRealtimePlaygroun
               Choosing `audio` still lets this playground render the assistant transcript from audio
               transcript events when the service sends them.
             </p>
+          </div>
+
+          <div className="border-t border-gray-200 pt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Assistant Segments</label>
+            <select
+              value={config.assistantSegmentMode}
+              onChange={(e) =>
+                setConfig((current) => ({
+                  ...current,
+                  assistantSegmentMode: e.target.value as AssistantSegmentMode,
+                }))
+              }
+              disabled={controlsDisabled}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100"
+            >
+              <option value="all">1. All text, all audio</option>
+              <option value="final_transcript_only">2. Final text only, all audio</option>
+              <option value="all_transcripts_final_audio">3. All text, final audio only</option>
+              <option value="final_segment_only">4. Final text only, final audio only</option>
+            </select>
+            <div className="text-xs text-gray-500 mt-2 space-y-1">
+              <p>`1. All text, all audio`: commentary 和 final 都显示，音频也全部实时播放。</p>
+              <p>`2. Final text only, all audio`: 音频全部实时播放，但 UI 只显示 final segment 的文本。</p>
+              <p>`3. All text, final audio only`: UI 显示 commentary 和 final 的全部文本，但音频只播放最后的 final segment。</p>
+              <p>`4. Final text only, final audio only`: 只显示 final segment 的文本，也只播放 final segment 的音频。</p>
+            </div>
           </div>
 
           <div className="border-t border-gray-200 pt-4">
