@@ -19,6 +19,9 @@ export interface WhisperClientConfig {
 export class WhisperRealtimeClient {
   private ws: WebSocket | null = null;
   private config: WhisperClientConfig;
+  private sessionConfiguredResolve: (() => void) | null = null;
+  private sessionConfiguredReject: ((error: Error) => void) | null = null;
+  private sessionConfiguredTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(config: WhisperClientConfig) {
     this.config = config;
@@ -27,42 +30,75 @@ export class WhisperRealtimeClient {
   async connect(): Promise<void> {
     this.config.onStatusChange('connecting');
 
-    try {
-      const base = this.config.endpoint.replace(/\/$/, '');
-      const host = base.replace(/^https?:\/\//, '');
-      const wsUrl = `wss://${host}/openai/v1/realtime?deployment=${encodeURIComponent(this.config.deployment)}&intent=transcription&api-key=${encodeURIComponent(this.config.apiKey)}`;
+    return new Promise((resolve, reject) => {
+      this.sessionConfiguredResolve = resolve;
+      this.sessionConfiguredReject = reject;
 
-      console.log('[Whisper Realtime] Connecting...');
-      this.ws = new WebSocket(wsUrl, ['realtime']);
+      try {
+        const base = this.config.endpoint.replace(/\/$/, '');
+        const host = base.replace(/^https?:\/\//, '');
+        const wsUrl = `wss://${host}/openai/v1/realtime?deployment=${encodeURIComponent(this.config.deployment)}&intent=transcription&api-key=${encodeURIComponent(this.config.apiKey)}`;
 
-      this.ws.onopen = () => {
-        console.log('[Whisper Realtime] WebSocket connected');
-        this.sendSessionUpdate();
-      };
+        console.log('[Whisper Realtime] Connecting...');
+        this.ws = new WebSocket(wsUrl, ['realtime']);
 
-      this.ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleServerEvent(data);
-        } catch (err) {
-          console.error('[Whisper Realtime] Failed to parse message:', err);
-        }
-      };
+        this.ws.onopen = () => {
+          console.log('[Whisper Realtime] WebSocket connected');
+          this.sendSessionUpdate();
+          this.sessionConfiguredTimeout = setTimeout(() => {
+            this.rejectSessionConfigured(new Error('Timed out waiting for transcription session configuration'));
+            this.config.onStatusChange('error');
+          }, 10000);
+        };
 
-      this.ws.onerror = () => {
-        this.config.onError('WebSocket connection error');
+        this.ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            this.handleServerEvent(data);
+          } catch (err) {
+            console.error('[Whisper Realtime] Failed to parse message:', err);
+          }
+        };
+
+        this.ws.onerror = () => {
+          const error = new Error('WebSocket connection error');
+          this.config.onError(error.message);
+          this.config.onStatusChange('error');
+          this.rejectSessionConfigured(error);
+        };
+
+        this.ws.onclose = (event) => {
+          console.log('[Whisper Realtime] WebSocket closed:', event.code, event.reason);
+          this.rejectSessionConfigured(new Error(event.reason || 'WebSocket closed before session was configured'));
+          this.config.onStatusChange('disconnected');
+        };
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.config.onError(`Failed to connect: ${err.message}`);
         this.config.onStatusChange('error');
-      };
+        this.rejectSessionConfigured(err);
+      }
+    });
+  }
 
-      this.ws.onclose = (event) => {
-        console.log('[Whisper Realtime] WebSocket closed:', event.code, event.reason);
-        this.config.onStatusChange('disconnected');
-      };
-    } catch (error) {
-      this.config.onError(`Failed to connect: ${error}`);
-      this.config.onStatusChange('error');
-      throw error;
+  private resolveSessionConfigured(): void {
+    if (this.sessionConfiguredTimeout) {
+      clearTimeout(this.sessionConfiguredTimeout);
+      this.sessionConfiguredTimeout = null;
     }
+    this.sessionConfiguredResolve?.();
+    this.sessionConfiguredResolve = null;
+    this.sessionConfiguredReject = null;
+  }
+
+  private rejectSessionConfigured(error: Error): void {
+    if (this.sessionConfiguredTimeout) {
+      clearTimeout(this.sessionConfiguredTimeout);
+      this.sessionConfiguredTimeout = null;
+    }
+    this.sessionConfiguredReject?.(error);
+    this.sessionConfiguredResolve = null;
+    this.sessionConfiguredReject = null;
   }
 
   private sendSessionUpdate(): void {
@@ -111,10 +147,13 @@ export class WhisperRealtimeClient {
       case 'session.created':
         console.log('[Whisper Realtime] Session created');
         this.config.onStatusChange('connected');
+        this.resolveSessionConfigured();
         break;
 
       case 'session.updated':
         console.log('[Whisper Realtime] Session updated');
+        this.config.onStatusChange('connected');
+        this.resolveSessionConfigured();
         break;
 
       case 'input_audio_buffer.speech_started':
@@ -146,6 +185,7 @@ export class WhisperRealtimeClient {
         const errorMsg = (event as any).error?.message || JSON.stringify((event as any).error);
         console.error('[Whisper Realtime] Server error:', errorMsg);
         this.config.onError(errorMsg);
+        this.rejectSessionConfigured(new Error(errorMsg));
         break;
       }
 
@@ -172,6 +212,9 @@ export class WhisperRealtimeClient {
   }
 
   disconnect(): void {
+    if (this.sessionConfiguredResolve || this.sessionConfiguredReject) {
+      this.rejectSessionConfigured(new Error('Disconnected before transcription session was configured'));
+    }
     if (this.ws) {
       this.ws.close();
       this.ws = null;

@@ -1,14 +1,26 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { TranslateRealtimeClient, type ConnectionStatus } from '../lib/gptRealtime/translateClient';
+import {
+  TranslateRealtimeClient,
+  type ConnectionStatus,
+} from '../lib/gptRealtime/translateClient';
+import { WhisperRealtimeClient } from '../lib/gptRealtime/whisperClient';
 import { GptRealtimeAudioHandler } from '../lib/gptRealtime/audioHandler';
 import { streamAudioFileRealtime } from '../lib/gptRealtime/streamAudioFile';
 
 interface TranslationEntry {
   id: string;
-  source: string;
   translated: string;
   timestamp: Date;
   isFinal: boolean;
+}
+
+interface PairedTranscriptEntry {
+  id: string;
+  source: string;
+  translated: string;
+  timestamp: Date;
+  sourceFinal: boolean;
+  translationFinal: boolean;
 }
 
 const TARGET_LANGUAGES = [
@@ -43,6 +55,11 @@ const TARGET_LANGUAGES = [
   { value: 'tl', label: 'Tagalog' },
 ];
 
+const SOURCE_LANGUAGES = [
+  { value: '', label: 'Auto-detect' },
+  ...TARGET_LANGUAGES,
+];
+
 interface GptRealtimeTranslatePlaygroundProps {
   endpoint: string;
   apiKey: string;
@@ -55,18 +72,30 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
   const [targetLanguage, setTargetLanguage] = useState(
     () => localStorage.getItem('gpt-translate-target-lang') || 'en',
   );
+  const [showSourceTranscriptConfig, setShowSourceTranscriptConfig] = useState(false);
   const [enableSourceTranscript, setEnableSourceTranscript] = useState(
-    () => localStorage.getItem('gpt-translate-source-transcript') !== 'false',
+    () => localStorage.getItem('gpt-translate-enable-source-transcript') === 'true',
+  );
+  const [sourceTranscriptDeployment, setSourceTranscriptDeployment] = useState(
+    () => localStorage.getItem('gpt-translate-source-deployment') || '',
+  );
+  const [sourceTranscriptLanguage, setSourceTranscriptLanguage] = useState(
+    () => localStorage.getItem('gpt-translate-source-language') || '',
+  );
+  const [sourceTranscriptPrompt, setSourceTranscriptPrompt] = useState(
+    () => localStorage.getItem('gpt-translate-source-prompt') || '',
   );
 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [isRecording, setIsRecording] = useState(false);
   const [entries, setEntries] = useState<TranslationEntry[]>([]);
+  const [pairedEntries, setPairedEntries] = useState<PairedTranscriptEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isStreamingFile, setIsStreamingFile] = useState(false);
   const [audioFileStatus, setAudioFileStatus] = useState('');
 
   const clientRef = useRef<TranslateRealtimeClient | null>(null);
+  const sourceTranscriptClientRef = useRef<WhisperRealtimeClient | null>(null);
   const audioHandlerRef = useRef<GptRealtimeAudioHandler | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const circleRef = useRef<HTMLDivElement | null>(null);
@@ -74,7 +103,14 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
   const audioFileAbortRef = useRef<AbortController | null>(null);
 
   // Current in-progress entry
-  const currentEntryRef = useRef<{ id: string; source: string; translated: string } | null>(null);
+  const currentEntryRef = useRef<{ id: string; translated: string } | null>(null);
+  const currentPairRef = useRef<{
+    id: string;
+    hasSource: boolean;
+    hasTranslated: boolean;
+    sourceFinal: boolean;
+    translationFinal: boolean;
+  } | null>(null);
 
   // Persist config
   useEffect(() => {
@@ -84,30 +120,161 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
     localStorage.setItem('gpt-translate-target-lang', targetLanguage);
   }, [targetLanguage]);
   useEffect(() => {
-    localStorage.setItem('gpt-translate-source-transcript', enableSourceTranscript.toString());
+    localStorage.setItem('gpt-translate-enable-source-transcript', String(enableSourceTranscript));
   }, [enableSourceTranscript]);
+  useEffect(() => {
+    localStorage.setItem('gpt-translate-source-deployment', sourceTranscriptDeployment);
+  }, [sourceTranscriptDeployment]);
+  useEffect(() => {
+    localStorage.setItem('gpt-translate-source-language', sourceTranscriptLanguage);
+  }, [sourceTranscriptLanguage]);
+  useEffect(() => {
+    localStorage.setItem('gpt-translate-source-prompt', sourceTranscriptPrompt);
+  }, [sourceTranscriptPrompt]);
+  useEffect(() => {
+    localStorage.removeItem('gpt-translate-source-transcript');
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [entries.length]);
+  }, [entries.length, pairedEntries.length]);
 
   // Cleanup
   useEffect(() => {
     return () => {
+      sourceTranscriptClientRef.current?.disconnect();
       clientRef.current?.disconnect();
       audioHandlerRef.current?.destroy();
     };
   }, []);
 
-  const addOrUpdateEntry = useCallback((id: string, source: string, translated: string, isFinal: boolean) => {
+  const addOrUpdateEntry = useCallback((id: string, translated: string, isFinal: boolean) => {
     setEntries((prev) => {
       const existing = prev.find((e) => e.id === id);
       if (existing) {
-        return prev.map((e) => (e.id === id ? { ...e, source, translated, isFinal } : e));
+        return prev.map((e) => (e.id === id ? { ...e, translated, isFinal } : e));
       }
-      return [...prev, { id, source, translated, timestamp: new Date(), isFinal }];
+      return [...prev, { id, translated, timestamp: new Date(), isFinal }];
     });
+  }, []);
+
+  const createPairedEntry = useCallback(() => {
+    const id = crypto.randomUUID();
+    currentPairRef.current = {
+      id,
+      hasSource: false,
+      hasTranslated: false,
+      sourceFinal: false,
+      translationFinal: false,
+    };
+    setPairedEntries((prev) => [
+      ...prev,
+      {
+        id,
+        source: '',
+        translated: '',
+        timestamp: new Date(),
+        sourceFinal: false,
+        translationFinal: false,
+      },
+    ]);
+    return id;
+  }, []);
+
+  const updatePairedEntry = useCallback((
+    id: string,
+    updater: (entry: PairedTranscriptEntry) => PairedTranscriptEntry,
+  ) => {
+    setPairedEntries((prev) => prev.map((entry) => (entry.id === id ? updater(entry) : entry)));
+  }, []);
+
+  const ensurePairedEntryForTranslation = useCallback(() => {
+    const current = currentPairRef.current;
+    if (!current) return createPairedEntry();
+    if (current.translationFinal && current.sourceFinal) return createPairedEntry();
+    return current.id;
+  }, [createPairedEntry]);
+
+  const ensurePairedEntryForSource = useCallback(() => {
+    const current = currentPairRef.current;
+    if (!current) return createPairedEntry();
+    if (current.hasSource) return createPairedEntry();
+    return current.id;
+  }, [createPairedEntry]);
+
+  const handlePairedTranslationDelta = useCallback((delta: string) => {
+    const pairId = ensurePairedEntryForTranslation();
+    if (currentPairRef.current?.id === pairId) {
+      currentPairRef.current.hasTranslated = true;
+      currentPairRef.current.translationFinal = false;
+    }
+    updatePairedEntry(pairId, (entry) => ({
+      ...entry,
+      translated: entry.translated + delta,
+      translationFinal: false,
+    }));
+  }, [ensurePairedEntryForTranslation, updatePairedEntry]);
+
+  const handlePairedTranslationDone = useCallback(() => {
+    const current = currentPairRef.current;
+    if (!current) return;
+    current.translationFinal = true;
+    updatePairedEntry(current.id, (entry) => ({
+      ...entry,
+      translationFinal: true,
+    }));
+  }, [updatePairedEntry]);
+
+  const handleSourceTranscriptDelta = useCallback((delta: string) => {
+    const pairId = ensurePairedEntryForSource();
+    if (currentPairRef.current?.id === pairId) {
+      currentPairRef.current.hasSource = true;
+      currentPairRef.current.sourceFinal = false;
+    }
+    updatePairedEntry(pairId, (entry) => ({
+      ...entry,
+      source: entry.source + delta,
+      sourceFinal: false,
+    }));
+  }, [ensurePairedEntryForSource, updatePairedEntry]);
+
+  const handleSourceTranscriptDone = useCallback((finalText?: string) => {
+    const current = currentPairRef.current;
+    if (!current) {
+      if (!finalText) return;
+      const pairId = createPairedEntry();
+      currentPairRef.current = {
+        id: pairId,
+        hasSource: true,
+        hasTranslated: false,
+        sourceFinal: true,
+        translationFinal: false,
+      };
+      updatePairedEntry(pairId, (entry) => ({
+        ...entry,
+        source: finalText,
+        sourceFinal: true,
+      }));
+      return;
+    }
+
+    current.hasSource = true;
+    current.sourceFinal = true;
+    updatePairedEntry(current.id, (entry) => ({
+      ...entry,
+      source: finalText || entry.source,
+      sourceFinal: true,
+    }));
+  }, [createPairedEntry, updatePairedEntry]);
+
+  const handleSourceSpeechStarted = useCallback(() => {
+    ensurePairedEntryForSource();
+  }, [ensurePairedEntryForSource]);
+
+  const sendAudioToActiveSessions = useCallback((audioData: ArrayBuffer) => {
+    clientRef.current?.sendAudio(audioData);
+    sourceTranscriptClientRef.current?.sendAudio(audioData);
   }, []);
 
   async function handleConnect() {
@@ -115,10 +282,16 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
       setError('Please configure Endpoint & API Key in the left sidebar');
       return;
     }
+    if (enableSourceTranscript && !sourceTranscriptDeployment.trim()) {
+      setError('Please configure a Source Transcript deployment in Advanced Source Transcript settings');
+      return;
+    }
 
+    sourceTranscriptClientRef.current?.disconnect();
     clientRef.current?.disconnect();
     audioHandlerRef.current?.destroy();
     currentEntryRef.current = null;
+    currentPairRef.current = null;
 
     const audioHandler = new GptRealtimeAudioHandler();
     audioHandlerRef.current = audioHandler;
@@ -131,53 +304,41 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
       apiKey: apiKey.trim(),
       deployment: deployment.trim(),
       targetLanguage,
-      enableSourceTranscript,
       onOutputAudioData: (audioData) => {
         audioHandler.playAudio(audioData);
       },
       onOutputTranscriptDelta: (delta) => {
+        if (enableSourceTranscript) {
+          handlePairedTranslationDelta(delta);
+          return;
+        }
         const entry = currentEntryRef.current;
         if (entry) {
           entry.translated += delta;
-          addOrUpdateEntry(entry.id, entry.source, entry.translated, false);
+          addOrUpdateEntry(entry.id, entry.translated, false);
         } else {
           const newId = crypto.randomUUID();
-          currentEntryRef.current = { id: newId, source: '', translated: delta };
-          addOrUpdateEntry(newId, '', delta, false);
-        }
-      },
-      onInputTranscriptDelta: (delta) => {
-        const entry = currentEntryRef.current;
-        if (entry) {
-          entry.source += delta;
-          addOrUpdateEntry(entry.id, entry.source, entry.translated, false);
-        } else {
-          const newId = crypto.randomUUID();
-          currentEntryRef.current = { id: newId, source: delta, translated: '' };
-          addOrUpdateEntry(newId, delta, '', false);
+          currentEntryRef.current = { id: newId, translated: delta };
+          addOrUpdateEntry(newId, delta, false);
         }
       },
       onSpeechStarted: () => {
-        // Finalize previous entry
-        if (currentEntryRef.current) {
-          addOrUpdateEntry(
-            currentEntryRef.current.id,
-            currentEntryRef.current.source,
-            currentEntryRef.current.translated,
-            true,
-          );
+        if (enableSourceTranscript) {
+          return;
         }
-        const newId = crypto.randomUUID();
-        currentEntryRef.current = { id: newId, source: '', translated: '' };
+        // Finalize previous entry
+        if (currentEntryRef.current?.translated) {
+          addOrUpdateEntry(currentEntryRef.current.id, currentEntryRef.current.translated, true);
+        }
+        currentEntryRef.current = null;
       },
       onTurnComplete: () => {
-        if (currentEntryRef.current) {
-          addOrUpdateEntry(
-            currentEntryRef.current.id,
-            currentEntryRef.current.source,
-            currentEntryRef.current.translated,
-            true,
-          );
+        if (enableSourceTranscript) {
+          handlePairedTranslationDone();
+          return;
+        }
+        if (currentEntryRef.current?.translated) {
+          addOrUpdateEntry(currentEntryRef.current.id, currentEntryRef.current.translated, true);
           currentEntryRef.current = null;
         }
       },
@@ -191,15 +352,43 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
     });
 
     clientRef.current = client;
+    sourceTranscriptClientRef.current = null;
+
+    if (enableSourceTranscript) {
+      const sourceClient = new WhisperRealtimeClient({
+        endpoint: endpoint.trim(),
+        apiKey: apiKey.trim(),
+        deployment: sourceTranscriptDeployment.trim(),
+        language: sourceTranscriptLanguage || undefined,
+        prompt: sourceTranscriptPrompt || undefined,
+        onTranscriptDelta: handleSourceTranscriptDelta,
+        onTranscriptDone: handleSourceTranscriptDone,
+        onSpeechStarted: handleSourceSpeechStarted,
+        onError: (err) => setError(`Source transcript error: ${err}`),
+        onStatusChange: (s) => {
+          if (s === 'disconnected') {
+            currentPairRef.current = null;
+          }
+        },
+      });
+
+      sourceTranscriptClientRef.current = sourceClient;
+    }
 
     try {
       setError(null);
       await client.connect();
+      if (sourceTranscriptClientRef.current) {
+        await sourceTranscriptClientRef.current.connect();
+      }
       await audioHandler.startRecording((audioData) => {
-        client.sendAudio(audioData);
+        sendAudioToActiveSessions(audioData);
       });
       setIsRecording(true);
     } catch (err) {
+      sourceTranscriptClientRef.current?.disconnect();
+      client.disconnect();
+      setIsRecording(false);
       setError(`Connection failed: ${err}`);
     }
   }
@@ -208,6 +397,7 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
     audioFileAbortRef.current?.abort();
     audioHandlerRef.current?.stopRecording();
     audioHandlerRef.current?.clearPlayback();
+    sourceTranscriptClientRef.current?.disconnect();
     clientRef.current?.disconnect();
     setIsRecording(false);
     setIsStreamingFile(false);
@@ -219,7 +409,7 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
       setIsRecording(false);
     } else if (audioHandlerRef.current && clientRef.current) {
       audioHandlerRef.current.startRecording((audioData) => {
-        clientRef.current?.sendAudio(audioData);
+        sendAudioToActiveSessions(audioData);
       });
       setIsRecording(true);
     }
@@ -227,7 +417,9 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
 
   function handleClear() {
     setEntries([]);
+    setPairedEntries([]);
     currentEntryRef.current = null;
+    currentPairRef.current = null;
   }
 
   async function handleTrySampleAudio() {
@@ -266,7 +458,7 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
         chunkDurationMs: 200,
         signal: abort.signal,
         onChunk: (pcm16) => {
-          clientRef.current?.sendAudio(pcm16);
+          sendAudioToActiveSessions(pcm16);
         },
         onProgress: (_percent, statusText) => {
           setAudioFileStatus(statusText);
@@ -283,7 +475,7 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
       // Restore mic
       if (wasMicOn && clientRef.current && status === 'connected') {
         audioHandlerRef.current?.startRecording((audioData) => {
-          clientRef.current?.sendAudio(audioData);
+          sendAudioToActiveSessions(audioData);
         });
         setIsRecording(true);
       }
@@ -341,40 +533,86 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
           )}
         </div>
 
-        {/* Translation entries - two-column layout */}
+        {/* Transcript + translation entries */}
         <div className="flex-1 overflow-y-auto p-4 bg-white">
-          {entries.length === 0 ? (
+          {entries.length === 0 && (!enableSourceTranscript || pairedEntries.length === 0) ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <p className="text-sm">Connect and speak — source and translation appear side by side</p>
+              <p className="text-sm">
+                {enableSourceTranscript
+                  ? 'Connect and speak — source transcript and translations appear here in real time'
+                  : 'Connect and speak — translations appear here in real time'}
+              </p>
             </div>
           ) : (
-            <div className="space-y-3 max-w-4xl mx-auto">
-              {entries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={`grid grid-cols-2 gap-3 p-3 rounded-lg border ${
-                    entry.isFinal ? 'border-gray-200 bg-gray-50' : 'border-indigo-200 bg-indigo-50'
-                  }`}
-                >
-                  {/* Source */}
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1 font-medium">Source</p>
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                      {entry.source || <span className="text-gray-400 italic">listening...</span>}
+            <div className={`mx-auto ${enableSourceTranscript ? 'max-w-6xl' : 'max-w-3xl'}`}>
+              {enableSourceTranscript ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                      Source Transcript + Translation
                     </p>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700">
+                        Parallel Mode
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Opens a second WebSocket to `{sourceTranscriptDeployment.trim() || 'source deployment'}`
+                      </span>
+                    </div>
                   </div>
-                  {/* Translation */}
-                  <div>
-                    <p className="text-xs text-indigo-500 mb-1 font-medium">
-                      Translation ({TARGET_LANGUAGES.find((l) => l.value === targetLanguage)?.label || targetLanguage})
-                    </p>
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                      {entry.translated || <span className="text-gray-400 italic">translating...</span>}
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-400 col-span-2">{entry.timestamp.toLocaleTimeString()}</p>
+                  {pairedEntries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className={`grid grid-cols-1 xl:grid-cols-2 gap-4 rounded-xl border p-4 ${
+                        entry.sourceFinal && entry.translationFinal
+                          ? 'border-gray-200 bg-gray-50'
+                          : 'border-indigo-200 bg-white'
+                      }`}
+                    >
+                      <div className="rounded-lg border border-gray-200 bg-white p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 mb-2">
+                          Source Transcript
+                        </p>
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                          {entry.source || <span className="text-gray-400 italic">listening...</span>}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-3">{entry.timestamp.toLocaleTimeString()}</p>
+                      </div>
+
+                      <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+                        <p className="text-xs text-indigo-500 mb-2 font-medium uppercase tracking-wide">
+                          Translation ({TARGET_LANGUAGES.find((l) => l.value === targetLanguage)?.label || targetLanguage})
+                        </p>
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                          {entry.translated || <span className="text-gray-400 italic">translating...</span>}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-3">{entry.timestamp.toLocaleTimeString()}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {entries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className={`p-4 rounded-lg border ${
+                        entry.isFinal ? 'border-gray-200 bg-gray-50' : 'border-indigo-200 bg-indigo-50'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-xs text-indigo-500 mb-1 font-medium uppercase tracking-wide">
+                          Translation ({TARGET_LANGUAGES.find((l) => l.value === targetLanguage)?.label || targetLanguage})
+                        </p>
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                          {entry.translated || <span className="text-gray-400 italic">translating...</span>}
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-3">{entry.timestamp.toLocaleTimeString()}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div ref={scrollRef} />
             </div>
           )}
@@ -384,7 +622,7 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
         <div className="bg-gray-50 border-t border-gray-200 p-4 flex items-center gap-2">
           <button
             onClick={handleClear}
-            disabled={entries.length === 0}
+            disabled={entries.length === 0 && pairedEntries.length === 0}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
           >
             Clear
@@ -428,21 +666,103 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
             <p className="text-xs text-gray-500 mt-1">Language to translate into (audio + text)</p>
           </div>
 
-          {/* Source Transcript */}
+          {/* Advanced source transcript */}
           <div className="border-t border-gray-200 pt-4">
-            <label className="flex items-center gap-2 mb-2">
-              <input
-                type="checkbox"
-                checked={enableSourceTranscript}
-                onChange={(e) => setEnableSourceTranscript(e.target.checked)}
-                disabled={status === 'connected'}
-                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-sm font-medium text-gray-700">Show Source Transcript</span>
-            </label>
-            <p className="text-xs text-gray-500 ml-6">
-              Also transcribe the original speech for side-by-side view
-            </p>
+            <button
+              type="button"
+              onClick={() => setShowSourceTranscriptConfig((prev) => !prev)}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div>
+                <p className="text-sm font-medium text-gray-700">Advanced Source Transcript</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional source-language captions using a separate realtime transcription WebSocket
+                </p>
+              </div>
+              <svg
+                className={`w-4 h-4 text-gray-400 transition-transform ${showSourceTranscriptConfig ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showSourceTranscriptConfig && (
+              <div className="mt-3 space-y-3 rounded-lg border border-amber-200 bg-amber-50/70 p-3">
+                <label className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={enableSourceTranscript}
+                    onChange={(e) => setEnableSourceTranscript(e.target.checked)}
+                    disabled={status === 'connected'}
+                    className="mt-0.5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium text-gray-700">Enable source transcript</span>
+                    <span className="block text-xs text-gray-500 mt-1">
+                      Adds source-language captions next to translation output and opens a second WebSocket.
+                    </span>
+                  </span>
+                </label>
+
+                {enableSourceTranscript && (
+                  <>
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                      <p className="text-sm font-medium text-emerald-800">Parallel Mode</p>
+                      <p className="text-xs text-emerald-700 mt-1">
+                        Recommended mode. Translation stays on the main translate WebSocket, while source transcript uses a second WebSocket connected to a dedicated transcription deployment.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Transcription Deployment</label>
+                      <input
+                        type="text"
+                        value={sourceTranscriptDeployment}
+                        onChange={(e) => setSourceTranscriptDeployment(e.target.value)}
+                        disabled={status === 'connected'}
+                        placeholder="gpt-realtime-whisper"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:bg-gray-100"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        This deployment is used by the second WebSocket for source-language captions.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Source Language</label>
+                      <select
+                        value={sourceTranscriptLanguage}
+                        onChange={(e) => setSourceTranscriptLanguage(e.target.value)}
+                        disabled={status === 'connected'}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:bg-gray-100"
+                      >
+                        {SOURCE_LANGUAGES.map((language) => (
+                          <option key={`${language.value || 'auto'}-source`} value={language.value}>
+                            {language.label}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">Leave on Auto-detect unless the input language is fixed.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Transcription Prompt</label>
+                      <textarea
+                        value={sourceTranscriptPrompt}
+                        onChange={(e) => setSourceTranscriptPrompt(e.target.value)}
+                        disabled={status === 'connected'}
+                        rows={3}
+                        placeholder="Optional context or expected terms to improve source transcription"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:bg-gray-100 resize-none"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Connect/Disconnect */}
@@ -450,7 +770,12 @@ export function GptRealtimeTranslatePlayground({ endpoint, apiKey }: GptRealtime
             {status !== 'connected' ? (
               <button
                 onClick={handleConnect}
-                disabled={!apiKey.trim() || !endpoint.trim() || status === 'connecting'}
+                disabled={
+                  !apiKey.trim()
+                  || !endpoint.trim()
+                  || status === 'connecting'
+                  || (enableSourceTranscript && !sourceTranscriptDeployment.trim())
+                }
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
