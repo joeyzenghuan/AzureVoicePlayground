@@ -22,6 +22,7 @@ export class GptRealtimeAudioHandler {
   private playbackQueue: AudioBufferSourceNode[] = [];
   private nextPlayTime = 0;
   private isPlaybackStarted = false;
+  private playbackStartTime = 0;
 
   // Animation
   private circleElement: HTMLElement | null = null;
@@ -157,6 +158,7 @@ export class GptRealtimeAudioHandler {
     if (!this.isPlaybackStarted || this.nextPlayTime < currentTime) {
       this.nextPlayTime = currentTime + 0.05;
       this.isPlaybackStarted = true;
+      this.playbackStartTime = this.nextPlayTime;
     }
 
     source.start(this.nextPlayTime);
@@ -185,6 +187,7 @@ export class GptRealtimeAudioHandler {
     this.playbackQueue = [];
     this.isPlaybackStarted = false;
     this.nextPlayTime = 0;
+    this.playbackStartTime = 0;
     if (this.currentAnimationType === 'play') {
       this.stopAnimation();
     }
@@ -192,6 +195,20 @@ export class GptRealtimeAudioHandler {
 
   isCurrentlyPlaying(): boolean {
     return this.playbackQueue.length > 0;
+  }
+
+  getPlayedAudioMs(): number {
+    if (!this.isPlaybackStarted || this.playbackStartTime <= 0) {
+      return 0;
+    }
+
+    return Math.max(0, (this.playbackContext.currentTime - this.playbackStartTime) * 1000);
+  }
+
+  interruptPlayback(): number {
+    const playedMs = this.getPlayedAudioMs();
+    this.clearPlayback();
+    return playedMs;
   }
 
   private startAnimation(type: 'record' | 'play'): void {

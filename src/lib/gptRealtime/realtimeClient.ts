@@ -1,67 +1,86 @@
 // GPT Realtime API Client using WebSocket
-// Supports both OpenAI and Azure OpenAI endpoints
+// Supports Azure OpenAI GA Realtime and OpenAI Realtime endpoints.
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
-export type RealtimeVoice = 'alloy' | 'ash' | 'ballad' | 'coral' | 'echo' | 'sage' | 'shimmer' | 'verse';
+export type RealtimeSessionPatch = Record<string, unknown>;
+export type RealtimeResponsePatch = Record<string, unknown>;
 
 export interface GptRealtimeClientConfig {
   apiKey: string;
-  endpoint: string; // e.g. "https://xxx.openai.azure.com" or "api.openai.com"
-  deploymentOrModel: string; // e.g. "gpt-4o-realtime-preview"
+  endpoint: string;
+  deploymentOrModel: string;
   isAzure: boolean;
-  voice: RealtimeVoice;
-  systemPrompt: string;
+  session: RealtimeSessionPatch;
+  response?: RealtimeResponsePatch;
   onAudioData: (audioData: ArrayBuffer) => void;
   onOutputTranscript: (text: string, isDelta: boolean) => void;
-  onInputTranscript: (text: string) => void;
+  onInputTranscript: (text: string, isDelta: boolean) => void;
   onTurnComplete: () => void;
   onInterrupted: () => void;
+  onUserSpeechStarted?: () => void;
   onError: (error: string) => void;
   onStatusChange: (status: ConnectionStatus) => void;
   onLatencyMeasured?: (latencyMs: number) => void;
 }
 
+type RealtimeServerEvent = Record<string, unknown>;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function mergeObjects<T extends Record<string, unknown>>(base: T, patch?: Record<string, unknown>): T {
+  if (!patch) {
+    return { ...base };
+  }
+
+  const result: Record<string, unknown> = { ...base };
+
+  for (const [key, value] of Object.entries(patch)) {
+    const current = result[key];
+    if (isPlainObject(current) && isPlainObject(value)) {
+      result[key] = mergeObjects(current, value);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result as T;
+}
+
+function decodeBase64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
 export class GptRealtimeClient {
   private ws: WebSocket | null = null;
-  private config: GptRealtimeClientConfig;
+  private readonly config: GptRealtimeClientConfig;
 
-  // Latency tracking
   private userSpeechEndTime: number | null = null;
-  private firstAudioReceived: boolean = false;
+  private firstAudioReceived = false;
+
+  private currentResponseId: string | null = null;
+  private currentAssistantItemId: string | null = null;
+  private currentAssistantContentIndex = 0;
+  private hasAudioTranscriptForCurrentResponse = false;
 
   constructor(config: GptRealtimeClientConfig) {
     this.config = config;
-  }
-
-  markSpeechEnd(): void {
-    this.userSpeechEndTime = performance.now();
-    this.firstAudioReceived = false;
-    const timestamp = new Date().toLocaleTimeString('en-US', {
-      hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit',
-    });
-    console.log(`🎤 [GPT Realtime] Speech end detected by VAD at ${timestamp}`);
   }
 
   async connect(): Promise<void> {
     this.config.onStatusChange('connecting');
 
     try {
-      let wsUrl: string;
-
-      if (this.config.isAzure) {
-        // Azure OpenAI Realtime endpoint
-        const base = this.config.endpoint.replace(/\/$/, '');
-        const host = base.replace(/^https?:\/\//, '');
-        wsUrl = `wss://${host}/openai/realtime?api-version=2025-04-01-preview&deployment=${encodeURIComponent(this.config.deploymentOrModel)}&api-key=${encodeURIComponent(this.config.apiKey)}`;
-      } else {
-        // OpenAI endpoint
-        wsUrl = `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(this.config.deploymentOrModel)}`;
-      }
-
+      const wsUrl = this.getWebSocketUrl();
       console.log('[GPT Realtime] Connecting to:', wsUrl);
 
-      // OpenAI requires auth in the protocol header; Azure uses query param or header
       const protocols = this.config.isAzure
         ? undefined
         : ['realtime', `openai-insecure-api-key.${this.config.apiKey}`, 'openai-beta.realtime-v1'];
@@ -70,14 +89,12 @@ export class GptRealtimeClient {
 
       this.ws.onopen = () => {
         console.log('[GPT Realtime] WebSocket connected');
-
-        // For Azure, send api-key via the session update (no subprotocol auth)
         this.sendSessionUpdate();
       };
 
       this.ws.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data = JSON.parse(event.data) as RealtimeServerEvent;
           this.handleServerEvent(data);
         } catch (err) {
           console.error('[GPT Realtime] Failed to parse message:', err);
@@ -92,9 +109,12 @@ export class GptRealtimeClient {
 
       this.ws.onclose = (event) => {
         console.log('[GPT Realtime] WebSocket closed:', event.code, event.reason);
+        this.currentResponseId = null;
+        this.currentAssistantItemId = null;
+        this.currentAssistantContentIndex = 0;
+        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onStatusChange('disconnected');
       };
-
     } catch (error) {
       console.error('[GPT Realtime] Connection failed:', error);
       this.config.onError(`Failed to connect: ${error}`);
@@ -103,43 +123,55 @@ export class GptRealtimeClient {
     }
   }
 
+  markSpeechEnd(): void {
+    this.userSpeechEndTime = performance.now();
+    this.firstAudioReceived = false;
+  }
+
   private sendSessionUpdate(): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
-    const sessionConfig: Record<string, unknown> = {
-      type: 'session.update',
-      session: {
-        modalities: ['text', 'audio'],
-        instructions: this.config.systemPrompt,
-        voice: this.config.voice,
-        input_audio_format: 'pcm16',
-        output_audio_format: 'pcm16',
-        input_audio_transcription: {
-          model: 'whisper-1',
-        },
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
-        },
+    const session = mergeObjects<Record<string, unknown>>(
+      {
+        type: 'realtime',
       },
-    };
+      this.config.session,
+    );
 
-    // Azure auth: inject api-key header via first message isn't possible in WS,
-    // but Azure OpenAI Realtime supports the api-key as a query param or in
-    // the subprotocol. For browser, we add it as a query param:
-    if (this.config.isAzure) {
-      // Reconnect with api-key in the URL if not already there
-      // Actually Azure supports api-key as a query param on the WS URL
-      // We'll handle this in the connect() method
-    }
-
-    this.ws.send(JSON.stringify(sessionConfig));
-    console.log('[GPT Realtime] Session update sent');
+    this.ws.send(
+      JSON.stringify({
+        type: 'session.update',
+        session,
+      }),
+    );
+    console.log('[GPT Realtime] Session update sent:', session);
   }
 
-  private handleServerEvent(event: Record<string, unknown>): void {
+  private sendResponseCreate(): void {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    const response = this.config.response ? mergeObjects({}, this.config.response) : {};
+    if (Object.keys(response).length > 0) {
+      this.ws.send(JSON.stringify({ type: 'response.create', response }));
+      return;
+    }
+
+    this.ws.send(JSON.stringify({ type: 'response.create' }));
+  }
+
+  private captureAssistantLocation(event: RealtimeServerEvent): void {
+    const itemId = event.item_id;
+    if (typeof itemId === 'string' && itemId) {
+      this.currentAssistantItemId = itemId;
+    }
+
+    const contentIndex = event.content_index;
+    if (typeof contentIndex === 'number') {
+      this.currentAssistantContentIndex = contentIndex;
+    }
+  }
+
+  private handleServerEvent(event: RealtimeServerEvent): void {
     const type = event.type as string;
 
     switch (type) {
@@ -152,87 +184,143 @@ export class GptRealtimeClient {
         console.log('[GPT Realtime] Session updated');
         break;
 
+      case 'conversation.item.created': {
+        const item = event.item;
+        if (isPlainObject(item) && item.role === 'assistant' && typeof item.id === 'string') {
+          this.currentAssistantItemId = item.id;
+        }
+        break;
+      }
+
+      case 'response.created': {
+        const response = event.response;
+        if (isPlainObject(response) && typeof response.id === 'string') {
+          this.currentResponseId = response.id;
+        } else {
+          this.currentResponseId = null;
+        }
+        this.hasAudioTranscriptForCurrentResponse = false;
+        break;
+      }
+
       case 'input_audio_buffer.speech_started':
-        console.log('[GPT Realtime] User speech started (server VAD)');
+        console.log('[GPT Realtime] User speech started');
+        this.config.onUserSpeechStarted?.();
         break;
 
       case 'input_audio_buffer.speech_stopped':
-        console.log('[GPT Realtime] User speech stopped (server VAD)');
+        console.log('[GPT Realtime] User speech stopped');
         this.userSpeechEndTime = performance.now();
         this.firstAudioReceived = false;
         break;
 
-      case 'input_audio_buffer.committed':
-        console.log('[GPT Realtime] Input audio committed');
-        break;
-
-      case 'conversation.item.input_audio_transcription.completed': {
-        const transcript = (event as any).transcript as string;
-        if (transcript) {
-          this.config.onInputTranscript(transcript);
+      case 'conversation.item.input_audio_transcription.delta': {
+        const delta = event.delta;
+        if (typeof delta === 'string' && delta) {
+          this.config.onInputTranscript(delta, true);
         }
         break;
       }
 
+      case 'conversation.item.input_audio_transcription.completed': {
+        const transcript = event.transcript;
+        if (typeof transcript === 'string' && transcript) {
+          this.config.onInputTranscript(transcript, false);
+        }
+        break;
+      }
+
+      case 'response.output_audio.delta':
       case 'response.audio.delta': {
-        const delta = (event as any).delta as string;
-        if (delta) {
-          // Measure latency on first audio chunk
-          if (!this.firstAudioReceived && this.userSpeechEndTime) {
+        this.captureAssistantLocation(event);
+        const delta = event.delta;
+        if (typeof delta === 'string' && delta) {
+          if (!this.firstAudioReceived && this.userSpeechEndTime != null) {
             const latency = performance.now() - this.userSpeechEndTime;
             this.firstAudioReceived = true;
-            console.log(`⚡ [GPT Realtime] First audio latency: ${latency.toFixed(0)}ms`);
             this.config.onLatencyMeasured?.(latency);
           }
 
-          // Decode base64 to ArrayBuffer
-          const binaryString = atob(delta);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          this.config.onAudioData(bytes.buffer);
+          this.config.onAudioData(decodeBase64ToArrayBuffer(delta));
         }
         break;
       }
 
+      case 'response.output_audio_transcript.delta':
       case 'response.audio_transcript.delta': {
-        const delta = (event as any).delta as string;
-        if (delta) {
+        this.captureAssistantLocation(event);
+        const delta = event.delta;
+        if (typeof delta === 'string' && delta) {
+          this.hasAudioTranscriptForCurrentResponse = true;
           this.config.onOutputTranscript(delta, true);
         }
         break;
       }
 
+      case 'response.output_audio_transcript.done':
       case 'response.audio_transcript.done': {
-        const transcript = (event as any).transcript as string;
-        if (transcript) {
+        this.captureAssistantLocation(event);
+        const transcript = event.transcript;
+        if (typeof transcript === 'string' && transcript) {
+          this.hasAudioTranscriptForCurrentResponse = true;
           this.config.onOutputTranscript(transcript, false);
         }
         break;
       }
 
+      case 'response.output_text.delta':
+      case 'response.text.delta': {
+        const delta = event.delta;
+        if (!this.hasAudioTranscriptForCurrentResponse && typeof delta === 'string' && delta) {
+          this.config.onOutputTranscript(delta, true);
+        }
+        break;
+      }
+
+      case 'response.output_text.done':
+      case 'response.text.done': {
+        const text = event.text;
+        if (!this.hasAudioTranscriptForCurrentResponse && typeof text === 'string' && text) {
+          this.config.onOutputTranscript(text, false);
+        }
+        break;
+      }
+
+      case 'conversation.item.truncated':
+        console.log('[GPT Realtime] Assistant item truncated');
+        this.currentResponseId = null;
+        this.currentAssistantItemId = null;
+        this.currentAssistantContentIndex = 0;
+        this.hasAudioTranscriptForCurrentResponse = false;
+        this.config.onInterrupted();
+        break;
+
       case 'response.done':
         console.log('[GPT Realtime] Response complete');
+        this.currentResponseId = null;
+        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onTurnComplete();
         break;
 
       case 'response.cancelled':
-        console.log('[GPT Realtime] Response cancelled (interrupted)');
+        console.log('[GPT Realtime] Response cancelled');
+        this.currentResponseId = null;
+        this.hasAudioTranscriptForCurrentResponse = false;
         this.config.onInterrupted();
         this.userSpeechEndTime = null;
         this.firstAudioReceived = false;
         break;
 
       case 'error': {
-        const errorMsg = (event as any).error?.message || 'Unknown error';
+        const err = event.error;
+        const errorMsg =
+          isPlainObject(err) && typeof err.message === 'string' ? err.message : 'Unknown error';
         console.error('[GPT Realtime] Server error:', errorMsg);
         this.config.onError(errorMsg);
         break;
       }
 
       default:
-        // Log unhandled events at debug level
         console.debug('[GPT Realtime] Unhandled event:', type);
         break;
     }
@@ -241,37 +329,61 @@ export class GptRealtimeClient {
   sendAudio(pcm16Data: ArrayBuffer): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
-    // Convert ArrayBuffer to base64
     const uint8Array = new Uint8Array(pcm16Data);
     let binary = '';
     for (let i = 0; i < uint8Array.length; i++) {
       binary += String.fromCharCode(uint8Array[i]);
     }
-    const base64 = btoa(binary);
 
-    this.ws.send(JSON.stringify({
-      type: 'input_audio_buffer.append',
-      audio: base64,
-    }));
+    this.ws.send(
+      JSON.stringify({
+        type: 'input_audio_buffer.append',
+        audio: btoa(binary),
+      }),
+    );
   }
 
   sendText(text: string): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
-    // Create a conversation item with user text
-    this.ws.send(JSON.stringify({
-      type: 'conversation.item.create',
-      item: {
-        type: 'message',
-        role: 'user',
-        content: [{ type: 'input_text', text }],
-      },
-    }));
+    this.ws.send(
+      JSON.stringify({
+        type: 'conversation.item.create',
+        item: {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text }],
+        },
+      }),
+    );
 
-    // Trigger a response
-    this.ws.send(JSON.stringify({
-      type: 'response.create',
-    }));
+    this.sendResponseCreate();
+  }
+
+  interruptResponse(audioEndMs: number): void {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    if (this.currentResponseId) {
+      this.ws.send(
+        JSON.stringify({
+          type: 'response.cancel',
+          response_id: this.currentResponseId,
+        }),
+      );
+    } else {
+      this.ws.send(JSON.stringify({ type: 'response.cancel' }));
+    }
+
+    if (this.currentAssistantItemId) {
+      this.ws.send(
+        JSON.stringify({
+          type: 'conversation.item.truncate',
+          item_id: this.currentAssistantItemId,
+          content_index: this.currentAssistantContentIndex,
+          audio_end_ms: Math.max(0, Math.round(audioEndMs)),
+        }),
+      );
+    }
   }
 
   disconnect(): void {
@@ -285,8 +397,9 @@ export class GptRealtimeClient {
     if (this.config.isAzure) {
       const base = this.config.endpoint.replace(/\/$/, '');
       const host = base.replace(/^https?:\/\//, '');
-      return `wss://${host}/openai/realtime?api-version=2025-04-01-preview&deployment=${encodeURIComponent(this.config.deploymentOrModel)}`;
+      return `wss://${host}/openai/v1/realtime?model=${encodeURIComponent(this.config.deploymentOrModel)}&api-key=${encodeURIComponent(this.config.apiKey)}`;
     }
+
     return `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(this.config.deploymentOrModel)}`;
   }
 }
